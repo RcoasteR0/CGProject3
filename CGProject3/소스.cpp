@@ -116,7 +116,7 @@ public:
 
 	void Draw(int i)
 	{
-		glDrawArrays(GL_TRIANGLE_FAN, i * 6, points);
+		glDrawArrays(GL_TRIANGLE_FAN, i * 4, points);
 	}
 };
 
@@ -160,6 +160,8 @@ void drawAxes()
 Shape cube[6];
 Shape pyramid[4];
 Shape coordinate[2];
+int drawidx = 0;
+int drawshape = 0;
 #endif // Quiz13
 
 void InitializeData()
@@ -259,20 +261,20 @@ GLvoid drawScene()
 	glBindVertexArray(vao);
 
 #ifdef Quiz13
-	for (int i = 0; i < 6; ++i)
+	if(true)
 	{
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, cube[i].translation);
-		model = glm::rotate(model, cube[i].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, cube[i].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, cube[i].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, cube[i].scaling);
+		model = glm::translate(model, cube[drawidx].translation);
+		model = glm::rotate(model, cube[drawidx].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, cube[drawidx].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, cube[drawidx].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, cube[drawidx].scaling);
 
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 		UpdateBuffer();
 
-		cube[0].Draw(i);
+		cube[0].Draw(drawidx);
 	}
 #endif // Quiz13
 
@@ -295,6 +297,37 @@ void convertXY(int x, int y, float& fx, float& fy)
 
 GLvoid Keyboard(unsigned char key, int x, int y)
 {
+#ifdef Quiz13
+	switch (key)
+	{
+	case '1':
+		drawshape = 1;
+		drawidx = 0;
+		break;
+	case '2':
+		drawshape = 1;
+		drawidx = 1;
+		break;
+	case '3':
+		drawshape = 1;
+		drawidx = 2;
+		break;
+	case '4':
+		drawshape = 1;
+		drawidx = 3;
+		break;
+	case '5':
+		drawshape = 1;
+		drawidx = 4;
+		break;
+	case '6':
+		drawshape = 1;
+		drawidx = 5;
+		break;
+	default:
+		break;
+	}
+#endif // Quiz13
 
 	if(key == 'q')
 		glutLeaveMainLoop();
