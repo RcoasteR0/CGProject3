@@ -167,50 +167,74 @@ int drawshape = 0;
 void InitializeData()
 {
 #ifdef Quiz13
-	glm::vec3 cubecoord[4];
+	glm::vec3 shapecoord[4];
 	float rotation = -10.0f;
 
-	cubecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
-	cubecoord[1] = glm::vec3(0.5, -0.5, -0.5);
-	cubecoord[2] = glm::vec3(0.5, 0.5, -0.5);
-	cubecoord[3] = glm::vec3(-0.5, 0.5, -0.5);
-	cube[0] = Shape(4, cubecoord);
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.5, 0.5, -0.5);
+	shapecoord[3] = glm::vec3(-0.5, 0.5, -0.5);
+	cube[0] = Shape(4, shapecoord);
 	cube[0].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
 
-	cubecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
-	cubecoord[1] = glm::vec3(0.5, -0.5, -0.5);
-	cubecoord[2] = glm::vec3(0.5, -0.5, 0.5);
-	cubecoord[3] = glm::vec3(-0.5, -0.5, 0.5);
-	cube[1] = Shape(4, cubecoord);
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.5, -0.5, 0.5);
+	shapecoord[3] = glm::vec3(-0.5, -0.5, 0.5);
+	cube[1] = Shape(4, shapecoord);
 	cube[1].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
 
-	cubecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
-	cubecoord[1] = glm::vec3(-0.5, 0.5, -0.5);
-	cubecoord[2] = glm::vec3(-0.5, 0.5, 0.5);
-	cubecoord[3] = glm::vec3(-0.5, -0.5, 0.5);
-	cube[2] = Shape(4, cubecoord);
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(-0.5, 0.5, -0.5);
+	shapecoord[2] = glm::vec3(-0.5, 0.5, 0.5);
+	shapecoord[3] = glm::vec3(-0.5, -0.5, 0.5);
+	cube[2] = Shape(4, shapecoord);
 	cube[2].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
 
-	cubecoord[0] = glm::vec3(0.5, -0.5, -0.5);
-	cubecoord[1] = glm::vec3(0.5, 0.5, -0.5);
-	cubecoord[2] = glm::vec3(0.5, 0.5, 0.5);
-	cubecoord[3] = glm::vec3(0.5, -0.5, 0.5);
-	cube[3] = Shape(4, cubecoord);
+	shapecoord[0] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, 0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.5, 0.5, 0.5);
+	shapecoord[3] = glm::vec3(0.5, -0.5, 0.5);
+	cube[3] = Shape(4, shapecoord);
 	cube[3].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
 
-	cubecoord[0] = glm::vec3(-0.5, 0.5, -0.5);
-	cubecoord[1] = glm::vec3(0.5, 0.5, -0.5);
-	cubecoord[2] = glm::vec3(0.5, 0.5, 0.5);
-	cubecoord[3] = glm::vec3(-0.5, 0.5, 0.5);
-	cube[4] = Shape(4, cubecoord);
+	shapecoord[0] = glm::vec3(-0.5, 0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, 0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.5, 0.5, 0.5);
+	shapecoord[3] = glm::vec3(-0.5, 0.5, 0.5);
+	cube[4] = Shape(4, shapecoord);
 	cube[4].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
 
-	cubecoord[0] = glm::vec3(-0.5, -0.5, 0.5);
-	cubecoord[1] = glm::vec3(0.5, -0.5, 0.5);
-	cubecoord[2] = glm::vec3(0.5, 0.5, 0.5);
-	cubecoord[3] = glm::vec3(-0.5, 0.5, 0.5);
-	cube[5] = Shape(4, cubecoord);
+	shapecoord[0] = glm::vec3(-0.5, -0.5, 0.5);
+	shapecoord[1] = glm::vec3(0.5, -0.5, 0.5);
+	shapecoord[2] = glm::vec3(0.5, 0.5, 0.5);
+	shapecoord[3] = glm::vec3(-0.5, 0.5, 0.5);
+	cube[5] = Shape(4, shapecoord);
 	cube[5].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
+
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.0, -0.5, 0.5);
+	pyramid[0] = Shape(3, shapecoord);
+	pyramid[0].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
+
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.0, 0.5, 0.0);
+	pyramid[1] = Shape(3, shapecoord);
+	pyramid[1].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
+
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.0, 0.5, 0.0);
+	shapecoord[2] = glm::vec3(0.0, -0.5, 0.5);
+	pyramid[2] = Shape(3, shapecoord);
+	pyramid[2].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
+
+	shapecoord[0] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.0, -0.5, 0.5);
+	shapecoord[2] = glm::vec3(0.0, 0.5, 0.0);
+	pyramid[3] = Shape(3, shapecoord);
+	pyramid[3].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
 
 #endif // Quiz13
 
@@ -261,7 +285,7 @@ GLvoid drawScene()
 	glBindVertexArray(vao);
 
 #ifdef Quiz13
-	if(true)
+	if(drawshape == 1)
 	{
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, cube[drawidx].translation);
@@ -274,7 +298,22 @@ GLvoid drawScene()
 
 		UpdateBuffer();
 
-		cube[0].Draw(drawidx);
+		cube[drawidx].Draw(drawidx);
+	}
+	if(drawshape == 2)
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, pyramid[drawidx].translation);
+		model = glm::rotate(model, pyramid[drawidx].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, pyramid[drawidx].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, pyramid[drawidx].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, pyramid[drawidx].scaling);
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+		UpdateBuffer();
+
+		pyramid[0].Draw(drawidx + 6);
 	}
 #endif // Quiz13
 
@@ -323,6 +362,22 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	case '6':
 		drawshape = 1;
 		drawidx = 5;
+		break;
+	case '7':
+		drawshape = 2;
+		drawidx = 0;
+		break;
+	case '8':
+		drawshape = 2;
+		drawidx = 1;
+		break;
+	case '9':
+		drawshape = 2;
+		drawidx = 2;
+		break;
+	case '0':
+		drawshape = 2;
+		drawidx = 3;
 		break;
 	default:
 		break;
@@ -406,6 +461,14 @@ void UpdateBuffer()
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 		glBufferSubData(GL_ARRAY_BUFFER, i * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecolor[0]));
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecoord[0]));
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
 	}
 #endif // Quiz13
 }
