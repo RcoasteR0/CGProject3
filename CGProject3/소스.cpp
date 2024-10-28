@@ -157,10 +157,14 @@ void drawAxes()
 }
 
 #ifdef Quiz13
+uniform_int_distribution<int> randcube(0, 5);
+uniform_int_distribution<int> randpyramid(0, 3);
+
 Shape cube[6];
 Shape pyramid[4];
 Shape coordinate[2];
 int drawidx = 0;
+int drawidx_2 = -1;
 int drawshape = 0;
 #endif // Quiz13
 
@@ -299,8 +303,24 @@ GLvoid drawScene()
 		UpdateBuffer();
 
 		cube[drawidx].Draw(drawidx);
+
+		if (drawidx_2 >= 0)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cube[drawidx_2].translation);
+			model = glm::rotate(model, cube[drawidx_2].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, cube[drawidx_2].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, cube[drawidx_2].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::scale(model, cube[drawidx_2].scaling);
+
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+			UpdateBuffer();
+
+			cube[drawidx_2].Draw(drawidx_2);
+		}
 	}
-	if(drawshape == 2)
+	else if(drawshape == 2)
 	{
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, pyramid[drawidx].translation);
@@ -314,6 +334,22 @@ GLvoid drawScene()
 		UpdateBuffer();
 
 		pyramid[0].Draw(drawidx + 6);
+
+		if (drawidx_2 >= 0)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, pyramid[drawidx_2].translation);
+			model = glm::rotate(model, pyramid[drawidx_2].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, pyramid[drawidx_2].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, pyramid[drawidx_2].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::scale(model, pyramid[drawidx_2].scaling);
+
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+			UpdateBuffer();
+
+			pyramid[drawidx_2].Draw(drawidx_2 + 6);
+		}
 	}
 #endif // Quiz13
 
@@ -342,42 +378,68 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	case '1':
 		drawshape = 1;
 		drawidx = 0;
+		drawidx_2 = -1;
 		break;
 	case '2':
 		drawshape = 1;
 		drawidx = 1;
+		drawidx_2 = -1;
 		break;
 	case '3':
 		drawshape = 1;
 		drawidx = 2;
+		drawidx_2 = -1;
 		break;
 	case '4':
 		drawshape = 1;
 		drawidx = 3;
+		drawidx_2 = -1;
 		break;
 	case '5':
 		drawshape = 1;
 		drawidx = 4;
+		drawidx_2 = -1;
 		break;
 	case '6':
 		drawshape = 1;
 		drawidx = 5;
+		drawidx_2 = -1;
 		break;
 	case '7':
 		drawshape = 2;
 		drawidx = 0;
+		drawidx_2 = -1;
 		break;
 	case '8':
 		drawshape = 2;
 		drawidx = 1;
+		drawidx_2 = -1;
 		break;
 	case '9':
 		drawshape = 2;
 		drawidx = 2;
+		drawidx_2 = -1;
 		break;
 	case '0':
 		drawshape = 2;
 		drawidx = 3;
+		drawidx_2 = -1;
+		break;
+	case 'c':
+		drawshape = 1;
+		drawidx = randcube(gen);
+		do
+		{
+			drawidx_2 = randcube(gen);
+		} while (drawidx == drawidx_2);
+		break;
+	case 't':
+		drawshape = 2;
+		drawidx = randpyramid(gen);
+		do
+		{
+			drawidx_2 = randpyramid(gen);
+		} while (drawidx == drawidx_2);
 		break;
 	default:
 		break;
