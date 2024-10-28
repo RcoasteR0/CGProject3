@@ -35,8 +35,8 @@ GLuint shaderPID;
 class Shape
 {
 public:
-	glm::vec3 shapecoord[6];
-	glm::vec3 shapecolor[6];
+	glm::vec3 shapecoord[4];
+	glm::vec3 shapecolor[4];
 	glm::vec3 translation;
 	glm::vec3 rotation;
 	glm::vec3 scaling;
@@ -44,7 +44,7 @@ public:
 
 	Shape()
 	{
-		for (int i = 0; i < 6; ++i)
+		for (int i = 0; i < 4; ++i)
 		{
 			shapecoord[i].x = 0.0f;
 			shapecoord[i].y = 0.0f;
@@ -64,7 +64,7 @@ public:
 		glm::vec3 color;
 		RandomColor(color.r, color.g, color.b);
 
-		for (int i = 0; i < 6; ++i)
+		for (int i = 0; i < 4; ++i)
 		{
 			if (i > state)
 			{
@@ -83,13 +83,13 @@ public:
 		}
 		translation = glm::vec3(0.0);
 		rotation = glm::vec3(0.0);
-		scaling = glm::vec3(0.0);
+		scaling = glm::vec3(1.0);
 		points = state;
 	}
 
 	Shape(int state, glm::vec3 coord[], glm::vec3 color)
 	{
-		for (int i = 0; i < 6; ++i)
+		for (int i = 0; i < 4; ++i)
 		{
 			if (i > state)
 			{
@@ -108,7 +108,7 @@ public:
 		}
 		translation = glm::vec3(0.0);
 		rotation = glm::vec3(0.0);
-		scaling = glm::vec3(0.0);
+		scaling = glm::vec3(1.0);
 		points = state;
 	}
 
@@ -116,7 +116,7 @@ public:
 
 	void Draw(int i)
 	{
-		glDrawElements(GL_TRIANGLE_FAN, points, GL_UNSIGNED_INT, (void*)(i * 6 * sizeof(GLuint)));
+		glDrawArrays(GL_TRIANGLE_FAN, i * 6, points);
 	}
 };
 
@@ -166,37 +166,49 @@ void InitializeData()
 {
 #ifdef Quiz13
 	glm::vec3 cubecoord[4];
+	float rotation = -10.0f;
 
 	cubecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
 	cubecoord[1] = glm::vec3(0.5, -0.5, -0.5);
 	cubecoord[2] = glm::vec3(0.5, 0.5, -0.5);
 	cubecoord[3] = glm::vec3(-0.5, 0.5, -0.5);
 	cube[0] = Shape(4, cubecoord);
+	cube[0].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
+
 	cubecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
 	cubecoord[1] = glm::vec3(0.5, -0.5, -0.5);
-	cubecoord[2] = glm::vec3(0.5, 0.5, -0.5);
-	cubecoord[3] = glm::vec3(-0.5, 0.5, -0.5);
+	cubecoord[2] = glm::vec3(0.5, -0.5, 0.5);
+	cubecoord[3] = glm::vec3(-0.5, -0.5, 0.5);
 	cube[1] = Shape(4, cubecoord);
+	cube[1].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
+
 	cubecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
-	cubecoord[1] = glm::vec3(0.5, -0.5, -0.5);
-	cubecoord[2] = glm::vec3(0.5, 0.5, -0.5);
-	cubecoord[3] = glm::vec3(-0.5, 0.5, -0.5);
+	cubecoord[1] = glm::vec3(-0.5, 0.5, -0.5);
+	cubecoord[2] = glm::vec3(-0.5, 0.5, 0.5);
+	cubecoord[3] = glm::vec3(-0.5, -0.5, 0.5);
 	cube[2] = Shape(4, cubecoord);
-	cubecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
-	cubecoord[1] = glm::vec3(0.5, -0.5, -0.5);
-	cubecoord[2] = glm::vec3(0.5, 0.5, -0.5);
-	cubecoord[3] = glm::vec3(-0.5, 0.5, -0.5);
+	cube[2].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
+
+	cubecoord[0] = glm::vec3(0.5, -0.5, -0.5);
+	cubecoord[1] = glm::vec3(0.5, 0.5, -0.5);
+	cubecoord[2] = glm::vec3(0.5, 0.5, 0.5);
+	cubecoord[3] = glm::vec3(0.5, -0.5, 0.5);
 	cube[3] = Shape(4, cubecoord);
-	cubecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
-	cubecoord[1] = glm::vec3(0.5, -0.5, -0.5);
-	cubecoord[2] = glm::vec3(0.5, 0.5, -0.5);
-	cubecoord[3] = glm::vec3(-0.5, 0.5, -0.5);
+	cube[3].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
+
+	cubecoord[0] = glm::vec3(-0.5, 0.5, -0.5);
+	cubecoord[1] = glm::vec3(0.5, 0.5, -0.5);
+	cubecoord[2] = glm::vec3(0.5, 0.5, 0.5);
+	cubecoord[3] = glm::vec3(-0.5, 0.5, 0.5);
 	cube[4] = Shape(4, cubecoord);
-	cubecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
-	cubecoord[1] = glm::vec3(0.5, -0.5, -0.5);
-	cubecoord[2] = glm::vec3(0.5, 0.5, -0.5);
-	cubecoord[3] = glm::vec3(-0.5, 0.5, -0.5);
+	cube[4].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
+
+	cubecoord[0] = glm::vec3(-0.5, -0.5, 0.5);
+	cubecoord[1] = glm::vec3(0.5, -0.5, 0.5);
+	cubecoord[2] = glm::vec3(0.5, 0.5, 0.5);
+	cubecoord[3] = glm::vec3(-0.5, 0.5, 0.5);
 	cube[5] = Shape(4, cubecoord);
+	cube[5].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
 
 #endif // Quiz13
 
@@ -221,7 +233,6 @@ void main(int argc, char** argv)
 
 	InitializeData();
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
 
 	make_shaderProgram();
 	InitBuffer();
@@ -241,11 +252,30 @@ GLvoid drawScene()
 
 	glBindVertexArray(axesVAO);
 	glm::mat4 axesTransform = glm::mat4(1.0f);
-	GLuint transformLoc = glGetUniformLocation(shaderProgramID, "transform");
+	GLuint transformLoc = glGetUniformLocation(shaderProgramID, "modelTransform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(axesTransform));
 	glDrawArrays(GL_LINES, 0, 4);
 
 	glBindVertexArray(vao);
+
+#ifdef Quiz13
+	for (int i = 0; i < 6; ++i)
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, cube[i].translation);
+		model = glm::rotate(model, cube[i].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, cube[i].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, cube[i].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, cube[i].scaling);
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+		UpdateBuffer();
+
+		cube[0].Draw(i);
+	}
+#endif // Quiz13
+
 
 	glutSwapBuffers();
 }
