@@ -9,7 +9,7 @@
 #include "Shader.h"
 #include "Shape.h"
 
-#define Quiz14
+#define Quiz15
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define FPS 60
@@ -36,7 +36,9 @@ void drawAxes()
 		glm::vec3(-1.0f,  0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), // x축 시작점 (빨간색)
 		glm::vec3(1.0f,  0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), // x축 끝점
 		glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), // y축 시작점 (녹색)
-		glm::vec3(0.0f,  1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f)  // y축 끝점
+		glm::vec3(0.0f,  1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),  // y축 끝점
+		glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 0.0f, 1.0f), // z축 시작점 (파랑)
+		glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),  // z축 끝점
 	};
 	glGenVertexArrays(1, &axesVAO);
 	glGenBuffers(1, &axesVBO);
@@ -89,7 +91,91 @@ bool depthtest = true;
 
 #ifdef Quiz15
 static const int index = 4;
+Shape cube, cone, sphere, cylinder;
 
+Shape CreateCube(float sideLength)
+{
+	glm::vec3 cubeCoords[MAX_POINTS];
+	float halfSide = sideLength / 2.0f;
+	int index = 0;
+
+	// 육면체의 각 면을 정의 (삼각형 두 개씩, 시계 방향)
+
+	// 앞면
+	cubeCoords[index++] = glm::vec3(-halfSide, -halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, -halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, -halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, halfSide, halfSide);
+
+	// 뒷면
+	cubeCoords[index++] = glm::vec3(-halfSide, -halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, -halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, -halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, halfSide, -halfSide);
+
+	// 왼쪽 면
+	cubeCoords[index++] = glm::vec3(-halfSide, -halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, -halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, -halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, halfSide, halfSide);
+
+	// 오른쪽 면
+	cubeCoords[index++] = glm::vec3(halfSide, -halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, -halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, -halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, halfSide, -halfSide);
+
+	// 위쪽 면
+	cubeCoords[index++] = glm::vec3(-halfSide, halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, halfSide, -halfSide);
+
+	// 아래쪽 면
+	cubeCoords[index++] = glm::vec3(-halfSide, -halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, -halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, -halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, -halfSide, halfSide);
+	cubeCoords[index++] = glm::vec3(-halfSide, -halfSide, -halfSide);
+	cubeCoords[index++] = glm::vec3(halfSide, -halfSide, -halfSide);
+
+	// Shape 객체 생성 (육면체의 각 면에 해당하는 좌표 포함)
+	Shape cube(index, cubeCoords);
+	return cube;
+}
+
+Shape CreateCone(float radius, float height, int segments)
+{
+	glm::vec3 coneCoords[MAX_POINTS];
+	glm::vec3 color(1.0f, 0.5f, 0.2f); // 원뿔 색상 (주황색 계열)
+	int index = 0;
+
+	// 꼭짓점 설정 (원뿔의 위쪽 점)
+	coneCoords[index++] = glm::vec3(0.0f, height, 0.0f);
+
+	// 밑면 점들 (삼각형 팬으로 측면을 그리기 위해 추가)
+	for (int i = 0; i <= segments; ++i)
+	{
+		float angle = 2.0f * M_PI * i / segments;
+		float x = radius * cos(angle);
+		float z = radius * sin(angle);
+		coneCoords[index++] = glm::vec3(x, 0.0f, z);
+	}
+
+	// Shape 객체 생성 (측면의 삼각형 팬을 위한 점 포함)
+	Shape cone(index, coneCoords, color);
+	return cone;
+}
 #endif // Quiz15
 
 
@@ -244,6 +330,12 @@ void InitializeData()
 	anim = NONE;
 	buffersize = 11;
 #endif // Quiz14
+#ifdef Quiz15
+	cube = CreateCube(0.3f);
+	cube.translation = glm::vec3(-0.5f, 0.0f, 0.0f);
+	cone = CreateCone(0.3f, 0.5f, 60);
+	cone.translation = glm::vec3(0.5f, 0.0f, 0.0f);
+#endif // Quiz15
 
 }
 
@@ -283,12 +375,24 @@ GLvoid drawScene()
 	glClearColor(bGCr, bGCg, bGCb, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(shaderProgramID);
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f); //카메라 위치
+	glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 0.0f); //카메라 바라보는 방향
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); //카메라 위쪽 방향
+	glm::mat4 view = glm::mat4(1.0f);
+
+#ifdef Quiz15
+	cameraPos = glm::vec3(0.5f, 0.5f, 5.0f);
+#endif // Quiz15
+
+	view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
+	unsigned int viewLocation = glGetUniformLocation(shaderProgramID, "viewTransform"); //뷰잉 변환 설정
+	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 
 	glBindVertexArray(axesVAO);
 	glm::mat4 axesTransform = glm::mat4(1.0f);
 	GLuint transformLoc = glGetUniformLocation(shaderProgramID, "modelTransform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(axesTransform));
-	glDrawArrays(GL_LINES, 0, 4);
+	glDrawArrays(GL_LINES, 0, 6);
 
 	glBindVertexArray(vao);
 
@@ -397,6 +501,10 @@ GLvoid drawScene()
 	}
 
 #endif // Quiz14
+#ifdef Quiz15
+	cube.Draw(0);
+	//cone.Draw(1);
+#endif // Quiz15
 
 	glutSwapBuffers();
 }
@@ -682,7 +790,7 @@ void InitBuffer()
 	GLuint indices[index * MAX_POINTS];
 	for (int i = 0; i < buffersize * MAX_POINTS; i++)
 	{
-		indices[i] = i % 4;
+		indices[i] = i % MAX_POINTS;
 	}
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
 
@@ -727,5 +835,18 @@ void UpdateBuffer()
 		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
 	}
 #endif // Quiz14
+#ifdef Quiz15
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cube.shapecoord[0]));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cube.shapecolor[0]));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cone.shapecoord[0]));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferSubData(GL_ARRAY_BUFFER, MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cone.shapecolor[0]));
+#endif // Quiz15
 
 }

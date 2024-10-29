@@ -3,6 +3,7 @@
 layout (location = 0) in vec3 in_Position;
 layout (location = 1) in vec3 in_Color;
 uniform mat4 modelTransform;
+uniform mat4 viewTransform;
 out vec3 out_Color;
 
 void main()
