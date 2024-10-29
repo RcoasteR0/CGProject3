@@ -8,7 +8,7 @@
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include "Shader.h"
 
-#define Quiz13
+#define Quiz14
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define FPS 60
@@ -27,9 +27,12 @@ void InitBuffer();
 void InitializeData();
 GLvoid Mouse(int button, int state, int x, int y);
 GLvoid Keyboard(unsigned char key, int x, int y);
+GLvoid SpecialKey(int key, int x, int y);
+
 GLvoid Timer(int value);
 
 float bGCr = 1.0, bGCg = 1.0, bGCb = 1.0;
+int buffersize;
 GLuint shaderPID;
 
 class Shape
@@ -162,11 +165,26 @@ uniform_int_distribution<int> randpyramid(0, 3);
 
 Shape cube[6];
 Shape pyramid[4];
-Shape coordinate[2];
 int drawidx = 0;
 int drawidx_2 = -1;
 int drawshape = 0;
 #endif // Quiz13
+
+#ifdef Quiz14
+enum Animation
+{
+	NONE, ROTATE_X, ROTATE_Y
+};
+
+
+Shape cube[6];
+Shape pyramid[5];
+Animation anim;
+int drawshape = 0;
+GLenum drawmode = GL_FILL;
+bool depthtest = true;
+
+#endif // Quiz14
 
 void InitializeData()
 {
@@ -240,7 +258,85 @@ void InitializeData()
 	pyramid[3] = Shape(3, shapecoord);
 	pyramid[3].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
 
+	buffersize = 10;
 #endif // Quiz13
+#ifdef Quiz14
+	glm::vec3 shapecoord[4];
+	float rotationX = -30.0f;
+	float rotationY = 30.0f;
+
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.5, 0.5, -0.5);
+	shapecoord[3] = glm::vec3(-0.5, 0.5, -0.5);
+	cube[0] = Shape(4, shapecoord);
+
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.5, -0.5, 0.5);
+	shapecoord[3] = glm::vec3(-0.5, -0.5, 0.5);
+	cube[1] = Shape(4, shapecoord);
+
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(-0.5, 0.5, -0.5);
+	shapecoord[2] = glm::vec3(-0.5, 0.5, 0.5);
+	shapecoord[3] = glm::vec3(-0.5, -0.5, 0.5);
+	cube[2] = Shape(4, shapecoord);
+
+	shapecoord[0] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, 0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.5, 0.5, 0.5);
+	shapecoord[3] = glm::vec3(0.5, -0.5, 0.5);
+	cube[3] = Shape(4, shapecoord);
+
+	shapecoord[0] = glm::vec3(-0.5, 0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, 0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.5, 0.5, 0.5);
+	shapecoord[3] = glm::vec3(-0.5, 0.5, 0.5);
+	cube[4] = Shape(4, shapecoord);
+
+	shapecoord[0] = glm::vec3(-0.5, -0.5, 0.5);
+	shapecoord[1] = glm::vec3(0.5, -0.5, 0.5);
+	shapecoord[2] = glm::vec3(0.5, 0.5, 0.5);
+	shapecoord[3] = glm::vec3(-0.5, 0.5, 0.5);
+	cube[5] = Shape(4, shapecoord);
+
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.5, -0.5, 0.5);
+	shapecoord[3] = glm::vec3(-0.5, -0.5, 0.5);
+	pyramid[0] = Shape(4, shapecoord);
+
+	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[1] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.0, 0.5, 0.0);
+	pyramid[1] = Shape(3, shapecoord);
+
+	shapecoord[0] = glm::vec3(0.5, -0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.5, -0.5, 0.5);
+	shapecoord[1] = glm::vec3(0.0, 0.5, 0.0);
+	pyramid[2] = Shape(3, shapecoord);
+
+	shapecoord[0] = glm::vec3(0.5, -0.5, 0.5);
+	shapecoord[1] = glm::vec3(-0.5, -0.5, 0.5);
+	shapecoord[2] = glm::vec3(0.0, 0.5, 0.0);
+	pyramid[3] = Shape(3, shapecoord);
+
+	shapecoord[0] = glm::vec3(-0.5, -0.5, 0.5);
+	shapecoord[1] = glm::vec3(-0.5, -0.5, -0.5);
+	shapecoord[2] = glm::vec3(0.0, 0.5, 0.0);
+	pyramid[4] = Shape(3, shapecoord);
+
+	for (int i = 0; i < 5; ++i)
+	{
+		cube[i].rotation = glm::radians(glm::vec3(rotationX, rotationY, 0.0));
+		pyramid[i].rotation = glm::radians(glm::vec3(rotationX, rotationY, 0.0));
+	}
+	cube[5].rotation = glm::radians(glm::vec3(rotationX, rotationY, 0.0));
+
+	anim = NONE;
+	buffersize = 11;
+#endif // Quiz14
 
 }
 
@@ -268,6 +364,7 @@ void main(int argc, char** argv)
 	InitBuffer();
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
+	glutSpecialFunc(SpecialKey);
 	glutMouseFunc(Mouse);
 	glutReshapeFunc(Reshape);
 	glutTimerFunc(1000 / FPS, Timer, 1);
@@ -333,7 +430,7 @@ GLvoid drawScene()
 
 		UpdateBuffer();
 
-		pyramid[0].Draw(drawidx + 6);
+		pyramid[i].Draw(drawidx + 6);
 
 		if (drawidx_2 >= 0)
 		{
@@ -352,7 +449,47 @@ GLvoid drawScene()
 		}
 	}
 #endif // Quiz13
+#ifdef Quiz14
+	if (drawshape == 1)
+	{
+		for (int i = 0; i < 6; ++i)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cube[i].translation);
+			model = glm::rotate(model, cube[i].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, cube[i].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, cube[i].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::scale(model, cube[i].scaling);
 
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+			UpdateBuffer();
+
+			glPolygonMode(GL_FRONT_AND_BACK, drawmode);
+			cube[i].Draw(i);
+		}
+	}
+	else if (drawshape == 2)
+	{
+		for (int i = 0; i < 5; ++i)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, pyramid[i].translation);
+			model = glm::rotate(model, pyramid[i].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, pyramid[i].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, pyramid[i].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::scale(model, pyramid[i].scaling);
+
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+			UpdateBuffer();
+
+			glPolygonMode(GL_FRONT_AND_BACK, drawmode);
+			pyramid[i].Draw(i + 6);
+		}
+	}
+
+#endif // Quiz14
 
 	glutSwapBuffers();
 }
@@ -445,9 +582,114 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	}
 #endif // Quiz13
+#ifdef Quiz14
+	switch (key)
+	{
+	case 'c':
+		drawshape = 1;
+		break;
+	case 'p':
+		drawshape = 2;
+		break;
+	case 'h':
+		if (depthtest)
+		{
+			glDisable(GL_DEPTH_TEST);
+			depthtest = false;
+		}
+		else
+		{
+			glEnable(GL_DEPTH_TEST);
+			depthtest = true;
+		}
+		break;
+	case 'w':
+		if (drawmode == GL_FILL)
+		{
+			drawmode = GL_LINE;
+		}
+		else if(drawmode == GL_LINE)
+		{
+			drawmode = GL_FILL;
+		}
+		break;
+	case 'x':
+		anim = ROTATE_X;
+		break;
+	case 'y':
+		anim = ROTATE_Y;
+		break;
+	case 's':
+		InitializeData();
+		break;
+	default:
+		break;
+	}
+#endif // Quiz14
 
 	if(key == 'q')
 		glutLeaveMainLoop();
+
+	glutPostRedisplay();
+}
+
+GLvoid SpecialKey(int key, int x, int y)
+{
+#ifdef Quiz14
+	switch (key)
+	{
+	case GLUT_KEY_RIGHT:
+		if(drawshape == 1)
+		{
+			for (int i = 0; i < 6; ++i)
+				cube[i].translation.x += 0.05f;
+		}
+		else if (drawshape == 2)
+		{
+			for (int i = 0; i < 5; ++i)
+				pyramid[i].translation.x += 0.05f;
+		}
+		break;
+	case GLUT_KEY_LEFT:
+		if(drawshape == 1)
+		{
+			for (int i = 0; i < 6; ++i)
+				cube[i].translation.x -= 0.05f;
+		}
+		else if (drawshape == 2)
+		{
+			for (int i = 0; i < 5; ++i)
+				pyramid[i].translation.x -= 0.05f;
+		}
+		break;
+	case GLUT_KEY_UP:
+		if(drawshape == 1)
+		{
+			for (int i = 0; i < 6; ++i)
+				cube[i].translation.y += 0.05f;
+		}
+		else if (drawshape == 2)
+		{
+			for (int i = 0; i < 5; ++i)
+				pyramid[i].translation.y += 0.05f;
+		}
+		break;
+	case GLUT_KEY_DOWN:
+		if(drawshape == 1)
+		{
+			for (int i = 0; i < 6; ++i)
+				cube[i].translation.y -= 0.05f;
+		}
+		else if (drawshape == 2)
+		{
+			for (int i = 0; i < 5; ++i)
+				pyramid[i].translation.y -= 0.05f;
+		}
+		break;
+	default:
+		break;
+	}
+#endif // Quiz14
 
 	glutPostRedisplay();
 }
@@ -461,6 +703,38 @@ GLvoid Mouse(int button, int state, int x, int y)
 
 GLvoid Timer(int value)
 {
+#ifdef Quiz14
+	switch (anim)
+	{
+	case ROTATE_X:
+		if (drawshape == 1)
+		{
+			for (int i = 0; i < 6; ++i)
+				cube[i].rotation.x += glm::radians(1.0f);
+		}
+		else if (drawshape == 2)
+		{
+			for (int i = 0; i < 5; ++i)
+				pyramid[i].rotation.x += glm::radians(1.0f);
+		}
+		break;
+	case ROTATE_Y:
+		if (drawshape == 1)
+		{
+			for (int i = 0; i < 6; ++i)
+				cube[i].rotation.y += glm::radians(1.0f);
+		}
+		else if (drawshape == 2)
+		{
+			for (int i = 0; i < 5; ++i)
+				pyramid[i].rotation.y += glm::radians(1.0f);
+		}
+		break;
+	default:
+		break;
+	}
+#endif // Quiz14
+
 	glutPostRedisplay();
 	glutTimerFunc(1000 / FPS, Timer, 1);
 }
@@ -476,9 +750,7 @@ void InitBuffer()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 
 	//--- 변수 diamond 에서 버텍스 데이터 값을 버퍼에 복사한다.
-#ifdef Quiz13
-	glBufferData(GL_ARRAY_BUFFER, 10 * 4 * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
-#endif // Quiz13
+	glBufferData(GL_ARRAY_BUFFER, buffersize * 4 * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
 
 	//--- 좌표값을 attribute 인덱스 0번에 명시한다: 버텍스 당 3* float
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -490,9 +762,7 @@ void InitBuffer()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 
 	//--- 변수 colors에서 버텍스 색상을 복사한다.
-#ifdef Quiz13
-	glBufferData(GL_ARRAY_BUFFER, 10 * 4 * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
-#endif //Quiz13
+	glBufferData(GL_ARRAY_BUFFER, buffersize * 4 * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
 
 	//--- 색상값을 attribute 인덱스 1번에 명시한다: 버텍스 당 3*float
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -504,12 +774,21 @@ void InitBuffer()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 #ifdef Quiz13
 	GLuint indices[10 * 4];
-	for (int i = 0; i < 10 * 4; i++)
+	for (int i = 0; i < buffersize * 4; i++)
 	{
 		indices[i] = i % 4;
 	}
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
-#endif Quiz13
+#endif // Quiz13
+#ifdef Quiz14
+	GLuint indices[11 * 4];
+	for (int i = 0; i < buffersize * 4; i++)
+	{
+		indices[i] = i % 4;
+	}
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+#endif // Quiz13
+
 	drawAxes();
 }
 
@@ -533,4 +812,23 @@ void UpdateBuffer()
 		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
 	}
 #endif // Quiz13
+#ifdef Quiz14
+	for (int i = 0; i < 6; i++)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, i * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecoord[0]));
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferSubData(GL_ARRAY_BUFFER, i * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecolor[0]));
+	}
+	for (int i = 0; i < 5; i++)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecoord[0]));
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
+	}
+#endif // Quiz14
+
 }
