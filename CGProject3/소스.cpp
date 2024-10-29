@@ -42,6 +42,7 @@ public:
 	glm::vec3 shapecolor[4];
 	glm::vec3 translation;
 	glm::vec3 rotation;
+	glm::vec3 revolution;
 	glm::vec3 scaling;
 	int points;
 
@@ -58,6 +59,7 @@ public:
 		}
 		translation = glm::vec3(0.0);
 		rotation = glm::vec3(0.0);
+		revolution = glm::vec3(0.0);
 		scaling = glm::vec3(0.0);
 		points = 0;
 	}
@@ -86,6 +88,7 @@ public:
 		}
 		translation = glm::vec3(0.0);
 		rotation = glm::vec3(0.0);
+		revolution = glm::vec3(0.0);
 		scaling = glm::vec3(1.0);
 		points = state;
 	}
@@ -111,6 +114,7 @@ public:
 		}
 		translation = glm::vec3(0.0);
 		rotation = glm::vec3(0.0);
+		revolution = glm::vec3(0.0);
 		scaling = glm::vec3(1.0);
 		points = state;
 	}
