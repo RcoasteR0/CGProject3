@@ -7,19 +7,14 @@
 #include <glm/glm/ext.hpp>
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include "Shader.h"
+#include "Shape.h"
 
 #define Quiz14
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define FPS 60
 
-using namespace std;
-
-random_device rd;
-mt19937 gen(rd());
-
 GLuint vao, vbo[2], ebo, axesVAO, axesVBO;
-void RandomColor(float& colorR, float& colorG, float& colorB);
 void drawAxes();
 void convertXY(int x, int y, float& fx, float& fy);
 void UpdateBuffer();
@@ -34,106 +29,6 @@ GLvoid Timer(int value);
 float bGCr = 1.0, bGCg = 1.0, bGCb = 1.0;
 int buffersize;
 GLuint shaderPID;
-
-class Shape
-{
-public:
-	glm::vec3 shapecoord[4];
-	glm::vec3 shapecolor[4];
-	glm::vec3 translation;
-	glm::vec3 rotation;
-	glm::vec3 revolution;
-	glm::vec3 scaling;
-	int points;
-
-	Shape()
-	{
-		for (int i = 0; i < 4; ++i)
-		{
-			shapecoord[i].x = 0.0f;
-			shapecoord[i].y = 0.0f;
-			shapecoord[i].z = 0.0f;
-			shapecolor[i].r = 0.0f;
-			shapecolor[i].g = 0.0f;
-			shapecolor[i].b = 0.0f;
-		}
-		translation = glm::vec3(0.0);
-		rotation = glm::vec3(0.0);
-		revolution = glm::vec3(0.0);
-		scaling = glm::vec3(0.0);
-		points = 0;
-	}
-
-	Shape(int state, glm::vec3 coord[])
-	{
-		glm::vec3 color;
-		RandomColor(color.r, color.g, color.b);
-
-		for (int i = 0; i < 4; ++i)
-		{
-			if (i > state)
-			{
-				shapecoord[i].x = 0.0f;
-				shapecoord[i].y = 0.0f;
-				shapecoord[i].z = 0.0f;
-				shapecolor[i].r = 0.0f;
-				shapecolor[i].g = 0.0f;
-				shapecolor[i].b = 0.0f;
-			}
-			else
-			{
-				shapecoord[i] = coord[i];
-				shapecolor[i] = color;
-			}
-		}
-		translation = glm::vec3(0.0);
-		rotation = glm::vec3(0.0);
-		revolution = glm::vec3(0.0);
-		scaling = glm::vec3(1.0);
-		points = state;
-	}
-
-	Shape(int state, glm::vec3 coord[], glm::vec3 color)
-	{
-		for (int i = 0; i < 4; ++i)
-		{
-			if (i > state)
-			{
-				shapecoord[i].x = 0.0f;
-				shapecoord[i].y = 0.0f;
-				shapecoord[i].z = 0.0f;
-				shapecolor[i].r = 0.0f;
-				shapecolor[i].g = 0.0f;
-				shapecolor[i].b = 0.0f;
-			}
-			else
-			{
-				shapecoord[i] = coord[i];
-				shapecolor[i] = color;
-			}
-		}
-		translation = glm::vec3(0.0);
-		rotation = glm::vec3(0.0);
-		revolution = glm::vec3(0.0);
-		scaling = glm::vec3(1.0);
-		points = state;
-	}
-
-	~Shape() {}
-
-	void Draw(int i)
-	{
-		glDrawArrays(GL_TRIANGLE_FAN, i * 4, points);
-	}
-};
-
-void RandomColor(float& colorR, float& colorG, float& colorB)
-{
-	uniform_real_distribution<float> random(0, 1);
-	colorR = random(gen);
-	colorG = random(gen);
-	colorB = random(gen);
-}
 
 void drawAxes()
 {
@@ -167,6 +62,8 @@ void drawAxes()
 uniform_int_distribution<int> randcube(0, 5);
 uniform_int_distribution<int> randpyramid(0, 3);
 
+static const int index = 10;
+
 Shape cube[6];
 Shape pyramid[4];
 int drawidx = 0;
@@ -180,6 +77,7 @@ enum Animation
 	NONE, ROTATE_X, ROTATE_Y
 };
 
+static const int index = 11;
 
 Shape cube[6];
 Shape pyramid[5];
@@ -187,8 +85,13 @@ Animation anim;
 int drawshape = 0;
 GLenum drawmode = GL_FILL;
 bool depthtest = true;
-
 #endif // Quiz14
+
+#ifdef Quiz15
+static const int index = 4;
+
+#endif // Quiz15
+
 
 void InitializeData()
 {
@@ -754,7 +657,7 @@ void InitBuffer()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 
 	//--- 변수 diamond 에서 버텍스 데이터 값을 버퍼에 복사한다.
-	glBufferData(GL_ARRAY_BUFFER, buffersize * 4 * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, buffersize * MAX_POINTS * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
 
 	//--- 좌표값을 attribute 인덱스 0번에 명시한다: 버텍스 당 3* float
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -766,7 +669,7 @@ void InitBuffer()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 
 	//--- 변수 colors에서 버텍스 색상을 복사한다.
-	glBufferData(GL_ARRAY_BUFFER, buffersize * 4 * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, buffersize * MAX_POINTS * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
 
 	//--- 색상값을 attribute 인덱스 1번에 명시한다: 버텍스 당 3*float
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -776,22 +679,12 @@ void InitBuffer()
 
 	glGenBuffers(1, &ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-#ifdef Quiz13
-	GLuint indices[10 * 4];
-	for (int i = 0; i < buffersize * 4; i++)
+	GLuint indices[index * MAX_POINTS];
+	for (int i = 0; i < buffersize * MAX_POINTS; i++)
 	{
 		indices[i] = i % 4;
 	}
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
-#endif // Quiz13
-#ifdef Quiz14
-	GLuint indices[11 * 4];
-	for (int i = 0; i < buffersize * 4; i++)
-	{
-		indices[i] = i % 4;
-	}
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
-#endif // Quiz13
 
 	drawAxes();
 }
@@ -802,36 +695,36 @@ void UpdateBuffer()
 	for (int i = 0; i < 6; i++)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glBufferSubData(GL_ARRAY_BUFFER, i * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecoord[0]));
+		glBufferSubData(GL_ARRAY_BUFFER, i * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecoord[0]));
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-		glBufferSubData(GL_ARRAY_BUFFER, i * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecolor[0]));
+		glBufferSubData(GL_ARRAY_BUFFER, i * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecolor[0]));
 	}
 	for (int i = 0; i < 4; i++)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecoord[0]));
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecoord[0]));
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
 	}
 #endif // Quiz13
 #ifdef Quiz14
 	for (int i = 0; i < 6; i++)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glBufferSubData(GL_ARRAY_BUFFER, i * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecoord[0]));
+		glBufferSubData(GL_ARRAY_BUFFER, i * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecoord[0]));
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-		glBufferSubData(GL_ARRAY_BUFFER, i * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecolor[0]));
+		glBufferSubData(GL_ARRAY_BUFFER, i * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecolor[0]));
 	}
 	for (int i = 0; i < 5; i++)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecoord[0]));
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecoord[0]));
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * 4 * 3 * sizeof(GLfloat), 4 * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
 	}
 #endif // Quiz14
 
