@@ -157,7 +157,6 @@ Shape CreateCube(float sideLength)
 Shape CreateCone(float radius, float height, int segments)
 {
 	glm::vec3 coneCoords[MAX_POINTS];
-	glm::vec3 color(1.0f, 0.5f, 0.2f); // 원뿔 색상 (주황색 계열)
 	int index = 0;
 
 	// 꼭짓점 설정 (원뿔의 위쪽 점)
@@ -173,7 +172,7 @@ Shape CreateCone(float radius, float height, int segments)
 	}
 
 	// Shape 객체 생성 (측면의 삼각형 팬을 위한 점 포함)
-	Shape cone(index, coneCoords, color);
+	Shape cone(index, coneCoords);
 	return cone;
 }
 #endif // Quiz15
@@ -335,6 +334,8 @@ void InitializeData()
 	cube.translation = glm::vec3(-0.5f, 0.0f, 0.0f);
 	cone = CreateCone(0.3f, 0.5f, 60);
 	cone.translation = glm::vec3(0.5f, 0.0f, 0.0f);
+
+	buffersize = 4;
 #endif // Quiz15
 
 }
@@ -380,10 +381,13 @@ GLvoid drawScene()
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); //카메라 위쪽 방향
 	glm::mat4 view = glm::mat4(1.0f);
 
+#ifdef Quiz15
+	cameraPos = glm::vec3(1.0f, 2.0f, 2.0f);
+#endif // Quiz15
+
 	view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
 	unsigned int viewLocation = glGetUniformLocation(shaderProgramID, "viewTransform"); //뷰잉 변환 설정
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
-
 
 	glm::mat4 projection = glm::mat4(1.0f);
 	projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -0.1f, 50.0f); //투영 공간 설정 : [-100.0, 100.0]
@@ -505,7 +509,29 @@ GLvoid drawScene()
 
 #endif // Quiz14
 #ifdef Quiz15
+	UpdateBuffer();
+
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, cube.translation);
+	model = glm::rotate(model, cube.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, cube.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, cube.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, cube.scaling);
+
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	cube.Draw(0);
+
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, cone.translation);
+	model = glm::rotate(model, cone.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, cone.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, cone.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, cone.scaling);
+
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
 	cone.Draw(1);
 #endif // Quiz15
 
