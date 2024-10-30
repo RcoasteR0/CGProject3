@@ -101,6 +101,7 @@ Shape cube, cone, sphere, cylinder;
 Animation anim;
 int rotatedir;
 int select;
+GLenum drawmode = GL_FILL;
 bool alter;
 
 Shape CreateCube(float sideLength)
@@ -224,25 +225,44 @@ Shape CreateCylinder(float radius, float height, int segments)
 	glm::vec3 cylinderCoords[MAX_POINTS];
 	int index = 0;
 
+	// 하단 중심점
+	cylinderCoords[index++] = glm::vec3(0.0f, 0.0f, 0.0f);
+
 	// 하단 밑면 점들
 	for (int i = 0; i <= segments; ++i)
 	{
 		float angle = 2.0f * M_PI * i / segments;
 		float x = radius * cos(angle);
 		float z = radius * sin(angle);
-
-		// 하단 밑면 점
 		cylinderCoords[index++] = glm::vec3(x, 0.0f, z);
+	}
 
-		// 상단 밑면 점
+	// 상단 중심점
+	cylinderCoords[index++] = glm::vec3(0.0f, height, 0.0f);
+
+	// 상단 밑면 점들
+	for (int i = 0; i <= segments; ++i)
+	{
+		float angle = 2.0f * M_PI * i / segments;
+		float x = radius * cos(angle);
+		float z = radius * sin(angle);
 		cylinderCoords[index++] = glm::vec3(x, height, z);
 	}
 
-	// Shape 객체 생성 (밑면과 측면 점 포함)
+	// 측면 (GL_TRIANGLE_STRIP을 사용하여 원통 벽면 생성)
+	for (int i = 0; i <= segments; ++i)
+	{
+		float angle = 2.0f * M_PI * i / segments;
+		float x = radius * cos(angle);
+		float z = radius * sin(angle);
+		cylinderCoords[index++] = glm::vec3(x, 0.0f, z);          // 하단 점
+		cylinderCoords[index++] = glm::vec3(x, height, z);        // 상단 점
+	}
+
+	// Shape 객체 생성 (원통의 점들을 포함)
 	Shape cylinder(index, cylinderCoords);
 	return cylinder;
 }
-
 #endif // Quiz15
 
 
@@ -397,8 +417,12 @@ void InitializeData()
 #ifdef Quiz15
 	cube = CreateCube(0.3f);
 	cube.translation = glm::vec3(-0.5f, 0.0f, 0.0f);
-	cone = CreateCone(0.3f, 0.5f, 60);
+	cone = CreateCone(0.3f, 0.5f, 100);
 	cone.translation = glm::vec3(0.5f, 0.0f, 0.0f);
+	sphere = CreateSphere(0.3f, 20, 20);
+	sphere.translation = glm::vec3(-0.5f, 0.0f, 0.0f);
+	cylinder = CreateCylinder(0.3f, 0.5f, 100);
+	cylinder.translation = glm::vec3(0.5f, 0.0f, 0.0f);
 
 	anim = NONE;
 	rotatedir = 0;
@@ -576,36 +600,78 @@ GLvoid drawScene()
 
 #endif // Quiz14
 #ifdef Quiz15
-	UpdateBuffer();
+	if (alter)
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, sphere.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, sphere.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, sphere.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::translate(model, sphere.translation);
+		model = glm::rotate(model, sphere.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, sphere.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, sphere.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, sphere.scaling);
 
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::rotate(model, cube.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	model = glm::rotate(model, cube.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	model = glm::rotate(model, cube.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	model = glm::translate(model, cube.translation);
-	model = glm::rotate(model, cube.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	model = glm::rotate(model, cube.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	model = glm::rotate(model, cube.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	model = glm::scale(model, cube.scaling);
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+		UpdateBuffer();
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	cube.Draw(0);
+		glPolygonMode(GL_FRONT_AND_BACK, drawmode);
+		sphere.Draw(2);
 
-	model = glm::mat4(1.0f);
-	model = glm::rotate(model, cone.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	model = glm::rotate(model, cone.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	model = glm::rotate(model, cone.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	model = glm::translate(model, cone.translation);
-	model = glm::rotate(model, cone.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	model = glm::rotate(model, cone.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	model = glm::rotate(model, cone.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	model = glm::scale(model, cone.scaling);
+		model = glm::mat4(1.0f);
+		model = glm::rotate(model, cylinder.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, cylinder.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, cylinder.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::translate(model, cylinder.translation);
+		model = glm::rotate(model, cylinder.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, cylinder.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, cylinder.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, cylinder.scaling);
 
-	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+		
+		UpdateBuffer();
 
-	cone.Draw(1);
+		glPolygonMode(GL_FRONT_AND_BACK, drawmode);
+		cylinder.DrawCylinder(3);
+	}
+	else
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, cube.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, cube.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, cube.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::translate(model, cube.translation);
+		model = glm::rotate(model, cube.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, cube.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, cube.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, cube.scaling);
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+		UpdateBuffer();
+
+		glPolygonMode(GL_FRONT_AND_BACK, drawmode);
+		cube.Draw(0);
+
+		model = glm::mat4(1.0f);
+		model = glm::rotate(model, cone.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, cone.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, cone.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::translate(model, cone.translation);
+		model = glm::rotate(model, cone.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, cone.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, cone.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, cone.scaling);
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+		UpdateBuffer();
+
+		glPolygonMode(GL_FRONT_AND_BACK, drawmode);
+		cone.Draw(1);
+	}
 #endif // Quiz15
 
 	glutSwapBuffers();
@@ -756,28 +822,80 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		select = 3;
 		break;
 	case 'x':
+		if (anim == ROTATE_X && rotatedir == 1)
+		{
+			anim = NONE;
+			break;
+		}
+
 		anim = ROTATE_X;
 		rotatedir = 1;
 		break;
 	case 'X':
+		if (anim == ROTATE_X && rotatedir == -1)
+		{
+			anim = NONE;
+			break;
+		}
+
 		anim = ROTATE_X;
 		rotatedir = -1;
 		break;
 	case 'y':
+		if (anim == ROTATE_Y && rotatedir == 1)
+		{
+			anim = NONE;
+			break;
+		}
+
 		anim = ROTATE_Y;
 		rotatedir = 1;
 		break;
 	case 'Y':
+		if (anim == ROTATE_Y && rotatedir == -1)
+		{
+			anim = NONE;
+			break;
+		}
+
 		anim = ROTATE_Y;
 		rotatedir = -1;
 		break;
 	case 'r':
+		if (anim == REVOLVE_Y && rotatedir == 1)
+		{
+			anim = NONE;
+			break;
+		}
+
 		anim = REVOLVE_Y;
 		rotatedir = 1;
 		break;
 	case 'R':
+		if (anim == REVOLVE_Y && rotatedir == -1)
+		{
+			anim = NONE;
+			break;
+		}
+
 		anim = REVOLVE_Y;
 		rotatedir = -1;
+		break;
+	case 'c':
+		if (alter)
+			alter = false;
+		else
+			alter = true;
+		break;
+	case 'w':
+		if (drawmode == GL_FILL)
+		{
+			drawmode = GL_LINE;
+		}
+		else if (drawmode == GL_LINE)
+		{
+			drawmode = GL_FILL;
+		}
 		break;
 	case 's':
 		InitializeData();
@@ -850,6 +968,21 @@ GLvoid SpecialKey(int key, int x, int y)
 		break;
 	}
 #endif // Quiz14
+#ifdef Quiz15
+	switch (key)
+	{
+	case GLUT_KEY_RIGHT:
+		break;
+	case GLUT_KEY_LEFT:
+		break;
+	case GLUT_KEY_UP:
+		break;
+	case GLUT_KEY_DOWN:
+		break;
+	default:
+		break;
+	}
+#endif // Quiz15
 
 	glutPostRedisplay();
 }
@@ -900,6 +1033,10 @@ GLvoid Timer(int value)
 	case ROTATE_X:
 		if (alter)
 		{
+			if (select == 1 || select == 3)
+				sphere.rotation.x += glm::radians(1.0f * rotatedir);
+			if (select == 2 || select == 3)
+				cylinder.rotation.x += glm::radians(1.0f * rotatedir);
 		}
 		else
 		{
@@ -912,16 +1049,24 @@ GLvoid Timer(int value)
 	case ROTATE_Y:
 		if (alter)
 		{
+			if (select == 1 || select == 3)
+				sphere.rotation.y += glm::radians(1.0f * rotatedir);
+			if (select == 2 || select == 3)
+				cylinder.rotation.y += glm::radians(1.0f * rotatedir);
 		}
 		else
 		{
-			cube.rotation.y += glm::radians(1.0f * rotatedir);
-			cone.rotation.y += glm::radians(1.0f * rotatedir);
+			if (select == 1 || select == 3)
+				cube.rotation.y += glm::radians(1.0f * rotatedir);
+			if (select == 2 || select == 3)
+				cone.rotation.y += glm::radians(1.0f * rotatedir);
 		}
 		break;
 	case REVOLVE_Y:
 		if (alter)
 		{
+			sphere.revolution.y += glm::radians(1.0f * rotatedir);
+			cylinder.revolution.y += glm::radians(1.0f * rotatedir);
 		}
 		else
 		{
@@ -938,13 +1083,19 @@ GLvoid Timer(int value)
 	glutTimerFunc(1000 / FPS, Timer, 1);
 }
 
+
+
 /*
 =========동작이 의도한대로 되지 않을때 확인할 것=========
+
 1. 버퍼 크기를 할당했는가
-2. 버퍼의 간격을 적정하게 주었는가
+2. 버퍼와 인덱스의 간격을 적정하게 주었는가
 3. 접근하려는 버퍼의 인덱스가 적절한가
+
 =========자주 실수하는 부분이니까 반드시 확인=========
 */
+
+
 
 void InitBuffer()
 {
@@ -1039,6 +1190,18 @@ void UpdateBuffer()
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	glBufferSubData(GL_ARRAY_BUFFER, MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cone.shapecolor[0]));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 2 * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(sphere.shapecoord[0]));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferSubData(GL_ARRAY_BUFFER, 2 * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(sphere.shapecolor[0]));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 3 * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cylinder.shapecoord[0]));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferSubData(GL_ARRAY_BUFFER, 3 * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cylinder.shapecolor[0]));
 #endif // Quiz15
 
 }

@@ -2,7 +2,7 @@
 #include <glm/glm/glm.hpp>
 #include "randomcolor.h"
 
-static const int MAX_POINTS = 100;  // 변경 가능한 최대 점 수
+static const int MAX_POINTS = 500;  // 변경 가능한 최대 점 수
 
 class Shape
 {
@@ -81,5 +81,19 @@ public:
 	void Draw(int i)
 	{
 		glDrawArrays(GL_TRIANGLE_FAN, i * MAX_POINTS, points);
+	}
+
+	void DrawCylinder(int i)
+	{
+		int baseVertexCount = points / 3;
+
+		// 하단 밑면
+		glDrawArrays(GL_TRIANGLE_FAN, i * MAX_POINTS, baseVertexCount);
+
+		// 상단 밑면
+		glDrawArrays(GL_TRIANGLE_FAN, i * MAX_POINTS + baseVertexCount, baseVertexCount);
+
+		// 측면
+		glDrawArrays(GL_TRIANGLE_STRIP, i * MAX_POINTS + 2 * baseVertexCount, points - 2 * baseVertexCount);
 	}
 };
