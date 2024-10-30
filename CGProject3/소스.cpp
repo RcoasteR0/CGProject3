@@ -98,6 +98,7 @@ enum Animation
 static const int index = 4;
 
 Shape cube, cone, sphere, cylinder;
+float scaleByzero;
 Animation anim;
 int rotatedir;
 int select;
@@ -424,6 +425,7 @@ void InitializeData()
 	cylinder = CreateCylinder(0.3f, 0.5f, 100);
 	cylinder.translation = glm::vec3(0.5f, 0.0f, 0.0f);
 
+	scaleByzero = 1.0f;
 	anim = NONE;
 	rotatedir = 0;
 	select = 3;
@@ -606,6 +608,7 @@ GLvoid drawScene()
 		model = glm::rotate(model, sphere.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, sphere.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, sphere.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(scaleByzero));
 		model = glm::translate(model, sphere.translation);
 		model = glm::rotate(model, sphere.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, sphere.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -623,6 +626,7 @@ GLvoid drawScene()
 		model = glm::rotate(model, cylinder.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, cylinder.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, cylinder.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(scaleByzero));
 		model = glm::translate(model, cylinder.translation);
 		model = glm::rotate(model, cylinder.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, cylinder.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -642,6 +646,7 @@ GLvoid drawScene()
 		model = glm::rotate(model, cube.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, cube.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, cube.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(scaleByzero));
 		model = glm::translate(model, cube.translation);
 		model = glm::rotate(model, cube.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, cube.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -659,6 +664,7 @@ GLvoid drawScene()
 		model = glm::rotate(model, cone.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, cone.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, cone.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(scaleByzero));
 		model = glm::translate(model, cone.translation);
 		model = glm::rotate(model, cone.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, cone.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -897,6 +903,44 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 			drawmode = GL_FILL;
 		}
 		break;
+	case '+':
+		if (alter)
+		{
+			if (select == 1 || select == 3)
+				sphere.scaling += glm::vec3(0.05f);
+			if (select == 2 || select == 3)
+				cylinder.scaling += glm::vec3(0.05f);
+		}
+		else
+		{
+			if (select == 1 || select == 3)
+				cube.scaling += glm::vec3(0.05f);
+			if (select == 2 || select == 3)
+				cone.scaling += glm::vec3(0.05f);
+		}
+		break;
+	case '-':
+		if (alter)
+		{
+			if (select == 1 || select == 3)
+				sphere.scaling -= glm::vec3(0.05f);
+			if (select == 2 || select == 3)
+				cylinder.scaling -= glm::vec3(0.05f);
+		}
+		else
+		{
+			if (select == 1 || select == 3)
+				cube.scaling -= glm::vec3(0.05f);
+			if (select == 2 || select == 3)
+				cone.scaling -= glm::vec3(0.05f);
+		}
+		break;
+	case ']':
+		scaleByzero += 0.05f;
+		break;
+	case '[':
+		scaleByzero -= 0.05f;
+		break;
 	case 's':
 		InitializeData();
 		break;
@@ -972,12 +1016,100 @@ GLvoid SpecialKey(int key, int x, int y)
 	switch (key)
 	{
 	case GLUT_KEY_RIGHT:
+		if (alter)
+		{
+			if (select == 1 || select == 3)
+				sphere.translation.x += 0.1f;
+			if (select == 2 || select == 3)
+				cylinder.translation.x += 0.1f;
+		}
+		else
+		{
+			if (select == 1 || select == 3)
+				cube.translation.x += 0.1f;
+			if (select == 2 || select == 3)
+				cone.translation.x += 0.1f;
+		}
 		break;
 	case GLUT_KEY_LEFT:
-		break;
-	case GLUT_KEY_UP:
+		if (alter)
+		{
+			if (select == 1 || select == 3)
+				sphere.translation.x -= 0.1f;
+			if (select == 2 || select == 3)
+				cylinder.translation.x -= 0.1f;
+		}
+		else
+		{
+			if (select == 1 || select == 3)
+				cube.translation.x -= 0.1f;
+			if (select == 2 || select == 3)
+				cone.translation.x -= 0.1f;
+		}
 		break;
 	case GLUT_KEY_DOWN:
+		if (alter)
+		{
+			if (select == 1 || select == 3)
+				sphere.translation.z += 0.1f;
+			if (select == 2 || select == 3)
+				cylinder.translation.z += 0.1f;
+		}
+		else
+		{
+			if (select == 1 || select == 3)
+				cube.translation.z += 0.1f;
+			if (select == 2 || select == 3)
+				cone.translation.z += 0.1f;
+		}
+		break;
+	case GLUT_KEY_UP:
+		if (alter)
+		{
+			if (select == 1 || select == 3)
+				sphere.translation.z -= 0.1f;
+			if (select == 2 || select == 3)
+				cylinder.translation.z -= 0.1f;
+		}
+		else
+		{
+			if (select == 1 || select == 3)
+				cube.translation.z -= 0.1f;
+			if (select == 2 || select == 3)
+				cone.translation.z -= 0.1f;
+		}
+		break;
+	case GLUT_KEY_SHIFT_L:
+		if (alter)
+		{
+			if (select == 1 || select == 3)
+				sphere.translation.y += 0.1f;
+			if (select == 2 || select == 3)
+				cylinder.translation.y += 0.1f;
+		}
+		else
+		{
+			if (select == 1 || select == 3)
+				cube.translation.y += 0.1f;
+			if (select == 2 || select == 3)
+				cone.translation.y += 0.1f;
+		}
+		break;
+	case GLUT_KEY_CTRL_L:
+		if (alter)
+		{
+			if (select == 1 || select == 3)
+				sphere.translation.y -= 0.1f;
+			if (select == 2 || select == 3)
+				cylinder.translation.y -= 0.1f;
+		}
+		else
+		{
+			if (select == 1 || select == 3)
+				cube.translation.y -= 0.1f;
+			if (select == 2 || select == 3)
+				cone.translation.y -= 0.1f;
+		}
 		break;
 	default:
 		break;
