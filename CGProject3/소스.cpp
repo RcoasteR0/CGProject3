@@ -1293,21 +1293,125 @@ GLvoid Timer(int value)
 		}
 		break;
 	case SPIRAL:
+	{
+		float angle = 8.0 * M_PI * progress / 100.0f;
+		float x = progress / 100.0f * cos(angle);
+		float z = progress / 100.0f * sin(angle);
+
 		if (alter)
 		{
+			sphere.translation = glm::vec3(x, 0.0f, z);
+			cylinder.translation = glm::vec3(-x, 0.0f, -z);
 		}
 		else
 		{
-			float angle = 8.0 * M_PI * progress / 500;
-			float x = progress / 500.0f * cos(angle);
-			float z = progress / 500.0f * sin(angle);
-
 			cube.translation = glm::vec3(x, 0.0f, z);
-			cone.translation = glm::vec3(x, 0.0f, z);
+			cone.translation = glm::vec3(-x, 0.0f, -z);
 		}
 
-		if (progress < 500)
+		if (progress < 100)
 			++progress;
+	}	
+		break;
+	case LINEAR:
+	{
+		float t = progress / 100.0f;
+		float x = (1.0f - t) * 0.5f + t * -0.5f;
+
+		if (alter)
+		{
+			sphere.translation = glm::vec3(x, 0.0f, 0.0f);
+			cylinder.translation = glm::vec3(-x, 0.0f, 0.0f);
+		}
+		else
+		{
+			cube.translation = glm::vec3(x, 0.0f, 0.0f);
+			cone.translation = glm::vec3(-x, 0.0f, 0.0f);
+		}
+
+		if (progress < 100)
+			++progress;
+	}
+		break;
+	case REVOLUTION_CURVE:
+	{
+		float t = progress / 100.0f;
+		float rad = glm::radians(180.0f * t);
+
+		if (alter)
+		{
+			sphere.revolution.y = rad;
+			cylinder.revolution.y = rad;
+		}
+		else
+		{
+			cube.revolution.y = rad;
+			cone.revolution.y = rad;
+		}
+
+		if (progress < 100)
+			++progress;
+	}
+		break;
+	case REVOLUTION_STRAIGHT:
+	{
+		float t = progress / 50.0f;
+		float x, z;
+
+		if (t < 1.0f)
+		{
+			x = (1 - t) * -0.5f;
+			z = t * -0.5f;
+		}
+		else if (t >= 1.0f)
+		{
+			t -= 1.0f;
+			x = t * 0.5f;
+			z = (1 - t) * -0.5f;
+		}
+
+		if (alter)
+		{
+			sphere.translation = glm::vec3(x, 0.0f, z);
+			cylinder.translation = glm::vec3(-x, 0.0f, -z);
+		}
+		else
+		{
+			cube.translation = glm::vec3(x, 0.0f, z);
+			cone.translation = glm::vec3(-x, 0.0f, -z);
+		}
+
+		if (progress < 100)
+			++progress;
+	}
+		break;
+	case REVOLUTION_WITHSCALE:
+	{
+		float t = progress / 100.0f;
+		float rad = glm::radians(180.0f * t);
+
+		if (alter)
+		{
+			sphere.rotation.y = rad;
+			cylinder.rotation.y = rad;
+			sphere.revolution.y = rad;
+			cylinder.revolution.y = rad;
+			sphere.scaling = glm::vec3(t);
+			cylinder.scaling = glm::vec3(1.0 - t);
+		}
+		else
+		{
+			cube.rotation.y = rad;
+			cone.rotation.y = rad;
+			cube.revolution.y = rad;
+			cone.revolution.y = rad;
+			cube.scaling = glm::vec3(t);
+			cone.scaling = glm::vec3(1.0 - t);
+		}
+
+		if (progress < 100)
+			++progress;
+	}
 		break;
 	default:
 		break;
