@@ -1356,29 +1356,29 @@ GLvoid Timer(int value)
 	case REVOLUTION_STRAIGHT:
 	{
 		float t = progress / 50.0f;
-		float x, z;
+		float x, y;
 
 		if (t < 1.0f)
 		{
 			x = (1 - t) * -0.5f;
-			z = t * -0.5f;
+			y = t * -0.5f;
 		}
 		else if (t >= 1.0f)
 		{
 			t -= 1.0f;
 			x = t * 0.5f;
-			z = (1 - t) * -0.5f;
+			y = (1 - t) * -0.5f;
 		}
 
 		if (alter)
 		{
-			sphere.translation = glm::vec3(x, 0.0f, z);
-			cylinder.translation = glm::vec3(-x, 0.0f, -z);
+			sphere.translation = glm::vec3(x, y, 0.0f);
+			cylinder.translation = glm::vec3(-x, -y, 0.0f);
 		}
 		else
 		{
-			cube.translation = glm::vec3(x, 0.0f, z);
-			cone.translation = glm::vec3(-x, 0.0f, -z);
+			cube.translation = glm::vec3(x, y, 0.0f);
+			cone.translation = glm::vec3(-x, -y, 0.0f);
 		}
 
 		if (progress < 100)
