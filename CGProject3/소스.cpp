@@ -255,7 +255,7 @@ void InitializeData()
 #endif // Quiz13
 #ifdef Quiz14
 	glm::vec3 shapecoord[4];
-	float rotationX = -30.0f;
+	float rotationX = 30.0f;
 	float rotationY = 30.0f;
 
 	shapecoord[0] = glm::vec3(-0.5, -0.5, -0.5);
@@ -375,24 +375,27 @@ GLvoid drawScene()
 	glClearColor(bGCr, bGCg, bGCb, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(shaderProgramID);
-	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f); //카메라 위치
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 1.0f); //카메라 위치
 	glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 0.0f); //카메라 바라보는 방향
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); //카메라 위쪽 방향
 	glm::mat4 view = glm::mat4(1.0f);
 
-#ifdef Quiz15
-	cameraPos = glm::vec3(0.5f, 0.5f, 5.0f);
-#endif // Quiz15
-
 	view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
 	unsigned int viewLocation = glGetUniformLocation(shaderProgramID, "viewTransform"); //뷰잉 변환 설정
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+
+
+	glm::mat4 projection = glm::mat4(1.0f);
+	projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -0.1f, 50.0f); //투영 공간 설정 : [-100.0, 100.0]
+	unsigned int projectionLocation = glGetUniformLocation(shaderProgramID, "projectionTransform"); //투영 변환 값 설정
+	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 
 	glBindVertexArray(axesVAO);
 	glm::mat4 axesTransform = glm::mat4(1.0f);
 	GLuint transformLoc = glGetUniformLocation(shaderProgramID, "modelTransform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(axesTransform));
 	glDrawArrays(GL_LINES, 0, 6);
+
 
 	glBindVertexArray(vao);
 
@@ -441,7 +444,7 @@ GLvoid drawScene()
 
 		UpdateBuffer();
 
-		pyramid[i].Draw(drawidx + 6);
+		pyramid[drawidx].Draw(drawidx + 6);
 
 		if (drawidx_2 >= 0)
 		{
@@ -503,7 +506,7 @@ GLvoid drawScene()
 #endif // Quiz14
 #ifdef Quiz15
 	cube.Draw(0);
-	//cone.Draw(1);
+	cone.Draw(1);
 #endif // Quiz15
 
 	glutSwapBuffers();
