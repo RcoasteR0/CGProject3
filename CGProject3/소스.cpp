@@ -90,8 +90,18 @@ bool depthtest = true;
 #endif // Quiz14
 
 #ifdef Quiz15
+enum Animation
+{
+	NONE, ROTATE_X, ROTATE_Y, REVOLVE_Y
+};
+
 static const int index = 4;
+
 Shape cube, cone, sphere, cylinder;
+Animation anim;
+int rotatedir;
+int select;
+bool alter;
 
 Shape CreateCube(float sideLength)
 {
@@ -175,6 +185,64 @@ Shape CreateCone(float radius, float height, int segments)
 	Shape cone(index, coneCoords);
 	return cone;
 }
+
+Shape CreateSphere(float radius, int latitudeSegments, int longitudeSegments)
+{
+	glm::vec3 sphereCoords[MAX_POINTS];
+
+	int index = 0;
+
+	// 위도와 경도를 따라 구 표면 점 생성
+	for (int lat = 0; lat <= latitudeSegments; ++lat)
+	{
+		float theta = lat * M_PI / latitudeSegments;
+		float sinTheta = sin(theta);
+		float cosTheta = cos(theta);
+
+		for (int lon = 0; lon <= longitudeSegments; ++lon)
+		{
+			float phi = lon * 2.0f * M_PI / longitudeSegments;
+			float sinPhi = sin(phi);
+			float cosPhi = cos(phi);
+
+			// x, y, z 좌표계로 변환하여 점 위치 설정
+			float x = radius * cosPhi * sinTheta;
+			float y = radius * cosTheta;
+			float z = radius * sinPhi * sinTheta;
+
+			sphereCoords[index++] = glm::vec3(x, y, z);
+		}
+	}
+
+	// 생성된 좌표로 Shape 객체 생성
+	Shape sphere(index, sphereCoords);
+	return sphere;
+}
+
+Shape CreateCylinder(float radius, float height, int segments)
+{
+	glm::vec3 cylinderCoords[MAX_POINTS];
+	int index = 0;
+
+	// 하단 밑면 점들
+	for (int i = 0; i <= segments; ++i)
+	{
+		float angle = 2.0f * M_PI * i / segments;
+		float x = radius * cos(angle);
+		float z = radius * sin(angle);
+
+		// 하단 밑면 점
+		cylinderCoords[index++] = glm::vec3(x, 0.0f, z);
+
+		// 상단 밑면 점
+		cylinderCoords[index++] = glm::vec3(x, height, z);
+	}
+
+	// Shape 객체 생성 (밑면과 측면 점 포함)
+	Shape cylinder(index, cylinderCoords);
+	return cylinder;
+}
+
 #endif // Quiz15
 
 
@@ -249,8 +317,6 @@ void InitializeData()
 	shapecoord[2] = glm::vec3(0.0, 0.5, 0.0);
 	pyramid[3] = Shape(3, shapecoord);
 	pyramid[3].rotation = glm::radians(glm::vec3(rotation, rotation, 0.0));
-
-	buffersize = 10;
 #endif // Quiz13
 #ifdef Quiz14
 	glm::vec3 shapecoord[4];
@@ -327,7 +393,6 @@ void InitializeData()
 	cube[5].rotation = glm::radians(glm::vec3(rotationX, rotationY, 0.0));
 
 	anim = NONE;
-	buffersize = 11;
 #endif // Quiz14
 #ifdef Quiz15
 	cube = CreateCube(0.3f);
@@ -335,9 +400,11 @@ void InitializeData()
 	cone = CreateCone(0.3f, 0.5f, 60);
 	cone.translation = glm::vec3(0.5f, 0.0f, 0.0f);
 
-	buffersize = 4;
+	anim = NONE;
+	rotatedir = 0;
+	select = 3;
+	alter = false;
 #endif // Quiz15
-
 }
 
 void main(int argc, char** argv)
@@ -512,6 +579,9 @@ GLvoid drawScene()
 	UpdateBuffer();
 
 	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::rotate(model, cube.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, cube.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, cube.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
 	model = glm::translate(model, cube.translation);
 	model = glm::rotate(model, cube.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	model = glm::rotate(model, cube.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -524,6 +594,9 @@ GLvoid drawScene()
 	cube.Draw(0);
 
 	model = glm::mat4(1.0f);
+	model = glm::rotate(model, cone.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, cone.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, cone.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
 	model = glm::translate(model, cone.translation);
 	model = glm::rotate(model, cone.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	model = glm::rotate(model, cone.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -670,6 +743,49 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	}
 #endif // Quiz14
+#ifdef Quiz15
+	switch (key)
+	{
+	case '1':
+		select = 1;
+		break;
+	case '2':
+		select = 2;
+		break;
+	case '3':
+		select = 3;
+		break;
+	case 'x':
+		anim = ROTATE_X;
+		rotatedir = 1;
+		break;
+	case 'X':
+		anim = ROTATE_X;
+		rotatedir = -1;
+		break;
+	case 'y':
+		anim = ROTATE_Y;
+		rotatedir = 1;
+		break;
+	case 'Y':
+		anim = ROTATE_Y;
+		rotatedir = -1;
+		break;
+	case 'r':
+		anim = REVOLVE_Y;
+		rotatedir = 1;
+		break;
+	case 'R':
+		anim = REVOLVE_Y;
+		rotatedir = -1;
+		break;
+	case 's':
+		InitializeData();
+		break;
+	default:
+		break;
+	}
+#endif // Quiz15
 
 	if(key == 'q')
 		glutLeaveMainLoop();
@@ -778,10 +894,57 @@ GLvoid Timer(int value)
 		break;
 	}
 #endif // Quiz14
+#ifdef Quiz15
+	switch (anim)
+	{
+	case ROTATE_X:
+		if (alter)
+		{
+		}
+		else
+		{
+			if(select == 1 || select == 3)
+				cube.rotation.x += glm::radians(1.0f * rotatedir);
+			if (select == 2 || select == 3)
+				cone.rotation.x += glm::radians(1.0f * rotatedir);
+		}
+		break;
+	case ROTATE_Y:
+		if (alter)
+		{
+		}
+		else
+		{
+			cube.rotation.y += glm::radians(1.0f * rotatedir);
+			cone.rotation.y += glm::radians(1.0f * rotatedir);
+		}
+		break;
+	case REVOLVE_Y:
+		if (alter)
+		{
+		}
+		else
+		{
+			cube.revolution.y += glm::radians(1.0f * rotatedir);
+			cone.revolution.y += glm::radians(1.0f * rotatedir);
+		}
+		break;
+	default:
+		break;
+	}
+#endif // Quiz15
 
 	glutPostRedisplay();
 	glutTimerFunc(1000 / FPS, Timer, 1);
 }
+
+/*
+=========동작이 의도한대로 되지 않을때 확인할 것=========
+1. 버퍼 크기를 할당했는가
+2. 버퍼의 간격을 적정하게 주었는가
+3. 접근하려는 버퍼의 인덱스가 적절한가
+=========자주 실수하는 부분이니까 반드시 확인=========
+*/
 
 void InitBuffer()
 {
@@ -794,7 +957,7 @@ void InitBuffer()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 
 	//--- 변수 diamond 에서 버텍스 데이터 값을 버퍼에 복사한다.
-	glBufferData(GL_ARRAY_BUFFER, buffersize * MAX_POINTS * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, index * MAX_POINTS * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
 
 	//--- 좌표값을 attribute 인덱스 0번에 명시한다: 버텍스 당 3* float
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -806,7 +969,7 @@ void InitBuffer()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 
 	//--- 변수 colors에서 버텍스 색상을 복사한다.
-	glBufferData(GL_ARRAY_BUFFER, buffersize * MAX_POINTS * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, index * MAX_POINTS * 3 * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
 
 	//--- 색상값을 attribute 인덱스 1번에 명시한다: 버텍스 당 3*float
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);

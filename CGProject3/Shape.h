@@ -35,6 +35,9 @@ public:
 
 	Shape(int state, glm::vec3 coord[])
 	{
+		if (state > MAX_POINTS)
+			exit(6974);
+
 		glm::vec3 color;
 		RandomColor(color.r, color.g, color.b);
 
@@ -52,6 +55,9 @@ public:
 
 	Shape(int state, glm::vec3 coord[], glm::vec3 color)
 	{
+		if (state > MAX_POINTS)
+			exit(6974);
+
 		for (int i = 0; i < state; ++i)
 		{
 			shapecoord[i].x = 0.0f;
