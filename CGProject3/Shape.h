@@ -82,6 +82,11 @@ public:
 	{
 		glDrawArrays(GL_TRIANGLE_FAN, i * MAX_POINTS, points);
 	}
+	
+	void DrawLineStrip(int i)
+	{
+		glDrawArrays(GL_LINE_STRIP, i * MAX_POINTS, points);
+	}
 
 	void DrawCylinder(int i)
 	{

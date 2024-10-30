@@ -92,16 +92,17 @@ bool depthtest = true;
 #ifdef Quiz15
 enum Animation
 {
-	NONE, ROTATE_X, ROTATE_Y, REVOLVE_Y
+	NONE, ROTATE_X, ROTATE_Y, REVOLVE_Y, SPIRAL, LINEAR, REVOLUTION_CURVE, REVOLUTION_STRAIGHT, REVOLUTION_WITHSCALE 
 };
 
-static const int index = 4;
+static const int index = 5;
 
-Shape cube, cone, sphere, cylinder;
+Shape cube, cone, sphere, cylinder, spiral;
 float scaleByzero;
 Animation anim;
 int rotatedir;
 int select;
+int progress;
 GLenum drawmode = GL_FILL;
 bool alter;
 
@@ -264,6 +265,25 @@ Shape CreateCylinder(float radius, float height, int segments)
 	Shape cylinder(index, cylinderCoords);
 	return cylinder;
 }
+
+Shape CreateSpiral(float radius, int segments)
+{
+	glm::vec3 spiralCoords[MAX_POINTS];
+	int index = 0;
+	float r = 0.0f;
+
+	for (int i = 0; i <= segments; ++i)
+	{
+		float angle = 8.0 * M_PI * i / segments;
+		float x = r * cos(angle);
+		float z = r * sin(angle);
+		spiralCoords[i] = glm::vec3(x, 0.0f, z);
+		r += radius;
+	}
+
+	Shape spiral(segments, spiralCoords);
+	return spiral;
+}
 #endif // Quiz15
 
 
@@ -424,11 +444,13 @@ void InitializeData()
 	sphere.translation = glm::vec3(-0.5f, 0.0f, 0.0f);
 	cylinder = CreateCylinder(0.3f, 0.5f, 100);
 	cylinder.translation = glm::vec3(0.5f, 0.0f, 0.0f);
+	spiral = CreateSpiral(0.002f, 499);
 
 	scaleByzero = 1.0f;
 	anim = NONE;
 	rotatedir = 0;
 	select = 3;
+	progress = 0;
 	alter = false;
 #endif // Quiz15
 }
@@ -678,6 +700,26 @@ GLvoid drawScene()
 		glPolygonMode(GL_FRONT_AND_BACK, drawmode);
 		cone.Draw(1);
 	}
+
+	if (anim == SPIRAL)
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, spiral.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, spiral.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, spiral.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(scaleByzero));
+		model = glm::translate(model, spiral.translation);
+		model = glm::rotate(model, spiral.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, spiral.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, spiral.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, spiral.scaling);
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+		UpdateBuffer();
+
+		spiral.DrawLineStrip(4);
+	}
 #endif // Quiz15
 
 	glutSwapBuffers();
@@ -887,6 +929,50 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		anim = REVOLVE_Y;
 		rotatedir = -1;
 		break;
+	case '6':
+	{
+		bool temp = alter;
+		InitializeData();
+		alter = temp;
+		anim = SPIRAL;
+		cube.translation = glm::vec3(0.0f);
+		cone.translation = glm::vec3(0.0f);
+		sphere.translation = glm::vec3(0.0f);
+		cylinder.translation = glm::vec3(0.0f);
+	}
+	break;
+	case '7':
+	{
+		bool temp = alter;
+		InitializeData();
+		alter = temp;
+		anim = LINEAR;
+	}
+	break;
+	case '8':
+	{
+		bool temp = alter;
+		InitializeData();
+		alter = temp;
+		anim = REVOLUTION_CURVE;
+	}
+	break;
+	case '9':
+	{
+		bool temp = alter;
+		InitializeData();
+		alter = temp;
+		anim = REVOLUTION_STRAIGHT;
+	}
+	break;
+	case '0':
+	{
+		bool temp = alter;
+		InitializeData();
+		alter = temp;
+		anim = REVOLUTION_WITHSCALE;
+	}
+	break;
 	case 'c':
 		if (alter)
 			alter = false;
@@ -1206,6 +1292,23 @@ GLvoid Timer(int value)
 			cone.revolution.y += glm::radians(1.0f * rotatedir);
 		}
 		break;
+	case SPIRAL:
+		if (alter)
+		{
+		}
+		else
+		{
+			float angle = 8.0 * M_PI * progress / 500;
+			float x = progress / 500.0f * cos(angle);
+			float z = progress / 500.0f * sin(angle);
+
+			cube.translation = glm::vec3(x, 0.0f, z);
+			cone.translation = glm::vec3(x, 0.0f, z);
+		}
+
+		if (progress < 500)
+			++progress;
+		break;
 	default:
 		break;
 	}
@@ -1334,6 +1437,12 @@ void UpdateBuffer()
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	glBufferSubData(GL_ARRAY_BUFFER, 3 * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cylinder.shapecolor[0]));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 4 * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(spiral.shapecoord[0]));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferSubData(GL_ARRAY_BUFFER, 4 * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(spiral.shapecolor[0]));
 #endif // Quiz15
 
 }
