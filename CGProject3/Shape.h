@@ -78,9 +78,9 @@ public:
 
 	~Shape() {}
 
-	void Draw(int i)
+	void Draw(int i, GLenum mode = GL_TRIANGLE_FAN)
 	{
-		glDrawArrays(GL_TRIANGLE_FAN, i * MAX_POINTS, points);
+		glDrawArrays(mode, i * MAX_POINTS, points);
 	}
 	
 	void DrawLineStrip(int i)

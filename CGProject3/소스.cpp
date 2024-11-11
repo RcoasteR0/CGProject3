@@ -9,7 +9,7 @@
 #include "Shader.h"
 #include "Shape.h"
 
-#define Quiz15
+#define Quiz17
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define FPS 60
@@ -286,6 +286,73 @@ Shape CreateSpiral(float radius, int segments)
 }
 #endif // Quiz15
 
+#ifdef Quiz17
+static const int index = 11;
+
+Shape cube[6];
+Shape pyramid[5];
+int drawshape = 1;
+GLenum drawmode = GL_FILL;
+bool depthtest = true;
+
+void CreateCube(Shape cube[], float sideLength = 0.5f)
+{
+	glm::vec3 cubeCoords[6][MAX_POINTS];
+
+	float halfSide = sideLength / 2.0f;
+	int index = 0;
+
+	// 육면체의 각 면을 정의 (삼각형 두 개씩, 시계 방향)
+
+	// 앞면
+	cubeCoords[0][index++] = glm::vec3(-halfSide, 0, halfSide);
+	cubeCoords[0][index++] = glm::vec3(halfSide, 0, halfSide);
+	cubeCoords[0][index++] = glm::vec3(halfSide, sideLength, halfSide);
+	cubeCoords[0][index++] = glm::vec3(-halfSide, sideLength, halfSide);
+	index = 0;
+
+	// 뒷면
+	cubeCoords[1][index++] = glm::vec3(-halfSide, 0, -halfSide);
+	cubeCoords[1][index++] = glm::vec3(halfSide, sideLength, -halfSide);
+	cubeCoords[1][index++] = glm::vec3(halfSide, 0, -halfSide);
+	cubeCoords[1][index++] = glm::vec3(-halfSide, sideLength, -halfSide);
+	index = 0;
+
+	// 왼쪽 면
+	cubeCoords[2][index++] = glm::vec3(-halfSide, 0, -halfSide);
+	cubeCoords[2][index++] = glm::vec3(-halfSide, sideLength, -halfSide);
+	cubeCoords[2][index++] = glm::vec3(-halfSide, sideLength, halfSide);
+	cubeCoords[2][index++] = glm::vec3(-halfSide, 0, halfSide);
+	index = 0;
+
+	// 오른쪽 면
+	cubeCoords[3][index++] = glm::vec3(halfSide, 0, -halfSide);
+	cubeCoords[3][index++] = glm::vec3(halfSide, 0, halfSide);
+	cubeCoords[3][index++] = glm::vec3(halfSide, sideLength, halfSide);
+	cubeCoords[3][index++] = glm::vec3(halfSide, sideLength, -halfSide);
+	index = 0;
+
+	// 위쪽 면
+	cubeCoords[4][index++] = glm::vec3(-halfSide, sideLength, halfSide);
+	cubeCoords[4][index++] = glm::vec3(halfSide, sideLength, halfSide);
+	cubeCoords[4][index++] = glm::vec3(halfSide, sideLength, -halfSide);
+	cubeCoords[4][index++] = glm::vec3(-halfSide, sideLength, -halfSide);
+	index = 0;
+
+	// 아래쪽 면
+	cubeCoords[5][index++] = glm::vec3(-halfSide, 0, halfSide);
+	cubeCoords[5][index++] = glm::vec3(halfSide, 0, -halfSide);
+	cubeCoords[5][index++] = glm::vec3(halfSide, 0, halfSide);
+	cubeCoords[5][index++] = glm::vec3(halfSide, 0, -halfSide);
+	index = 0;
+
+	// Shape 객체 생성 (육면체의 각 면에 해당하는 좌표 포함)
+	for (int i = 0; i < 6; ++i)
+	{
+		cube[i] = Shape(4, cubeCoords[i]);
+	}
+}
+#endif // Quiz17
 
 void InitializeData()
 {
@@ -453,6 +520,10 @@ void InitializeData()
 	progress = 0;
 	alter = false;
 #endif // Quiz15
+#ifdef Quiz17
+	CreateCube(cube);
+#endif // Quzi17
+
 }
 
 void main(int argc, char** argv)
@@ -499,6 +570,9 @@ GLvoid drawScene()
 #ifdef Quiz15
 	cameraPos = glm::vec3(1.0f, 2.0f, 2.0f);
 #endif // Quiz15
+#ifdef Quiz17
+	cameraPos = glm::vec3(-1.0f, 2.0f, 2.0f);
+#endif // Quiz17
 
 	view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
 	unsigned int viewLocation = glGetUniformLocation(shaderProgramID, "viewTransform"); //뷰잉 변환 설정
@@ -721,6 +795,30 @@ GLvoid drawScene()
 		spiral.DrawLineStrip(4);
 	}
 #endif // Quiz15
+#ifdef Quiz17
+	if (drawshape == 1)
+	{
+		for (int i = 0; i < 6; ++i)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, cube[i].revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, cube[i].revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, cube[i].revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::translate(model, cube[i].translation);
+			model = glm::rotate(model, cube[i].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, cube[i].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, cube[i].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::scale(model, cube[i].scaling);
+
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+			UpdateBuffer();
+
+			glPolygonMode(GL_FRONT_AND_BACK, drawmode);
+			cube[i].Draw(i);
+		}
+	}
+#endif // Quiz17
 
 	glutSwapBuffers();
 }
@@ -1548,5 +1646,24 @@ void UpdateBuffer()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	glBufferSubData(GL_ARRAY_BUFFER, 4 * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(spiral.shapecolor[0]));
 #endif // Quiz15
+#ifdef Quiz17
+	for (int i = 0; i < 6; i++)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, i * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecoord[0]));
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferSubData(GL_ARRAY_BUFFER, i * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecolor[0]));
+	}
+	//for (int i = 0; i < 5; i++)
+	//{
+	//	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	//	glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecoord[0]));
+
+	//	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	//	glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
+	//}
+
+#endif // Quiz17
 
 }
