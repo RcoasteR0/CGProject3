@@ -294,6 +294,7 @@ Shape pyramid[5];
 int drawshape = 1;
 GLenum drawmode = GL_FILL;
 bool depthtest = true;
+bool rotationY = false;
 
 void CreateCube(Shape cube[], float sideLength = 0.5f)
 {
@@ -313,8 +314,8 @@ void CreateCube(Shape cube[], float sideLength = 0.5f)
 
 	// 뒷면
 	cubeCoords[1][index++] = glm::vec3(-halfSide, 0, -halfSide);
-	cubeCoords[1][index++] = glm::vec3(halfSide, sideLength, -halfSide);
 	cubeCoords[1][index++] = glm::vec3(halfSide, 0, -halfSide);
+	cubeCoords[1][index++] = glm::vec3(halfSide, sideLength, -halfSide);
 	cubeCoords[1][index++] = glm::vec3(-halfSide, sideLength, -halfSide);
 	index = 0;
 
@@ -341,15 +342,61 @@ void CreateCube(Shape cube[], float sideLength = 0.5f)
 
 	// 아래쪽 면
 	cubeCoords[5][index++] = glm::vec3(-halfSide, 0, halfSide);
+	cubeCoords[5][index++] = glm::vec3(-halfSide, 0, -halfSide);
 	cubeCoords[5][index++] = glm::vec3(halfSide, 0, -halfSide);
 	cubeCoords[5][index++] = glm::vec3(halfSide, 0, halfSide);
-	cubeCoords[5][index++] = glm::vec3(halfSide, 0, -halfSide);
 	index = 0;
 
 	// Shape 객체 생성 (육면체의 각 면에 해당하는 좌표 포함)
 	for (int i = 0; i < 6; ++i)
 	{
 		cube[i] = Shape(4, cubeCoords[i]);
+	}
+}
+
+void CreatePyramid(Shape pyramid[], float sideLength = 0.5f, float height = 0.5f)
+{
+	glm::vec3 pyramidCoords[5][MAX_POINTS];
+
+	float halfSide = sideLength / 2.0f;
+	int index = 0;
+
+	// 아래쪽 면
+	pyramidCoords[0][index++] = glm::vec3(-halfSide, 0, halfSide);
+	pyramidCoords[0][index++] = glm::vec3(-halfSide, 0, -halfSide);
+	pyramidCoords[0][index++] = glm::vec3(halfSide, 0, -halfSide);
+	pyramidCoords[0][index++] = glm::vec3(-halfSide, 0, halfSide);
+	index = 0;
+
+	// 앞면
+	pyramidCoords[1][index++] = glm::vec3(-halfSide, 0, halfSide);
+	pyramidCoords[1][index++] = glm::vec3(halfSide, 0, halfSide);
+	pyramidCoords[1][index++] = glm::vec3(0, height, 0);
+	index = 0;
+
+	// 뒷면
+	pyramidCoords[2][index++] = glm::vec3(-halfSide, 0, -halfSide);
+	pyramidCoords[2][index++] = glm::vec3(halfSide, 0, -halfSide);
+	pyramidCoords[2][index++] = glm::vec3(0, height, 0);
+	index = 0;
+
+	// 왼쪽 면
+	pyramidCoords[3][index++] = glm::vec3(-halfSide, 0, halfSide);
+	pyramidCoords[3][index++] = glm::vec3(-halfSide, 0, -halfSide);
+	pyramidCoords[3][index++] = glm::vec3(0, height, 0);
+	index = 0;
+
+	// 오른쪽 면
+	pyramidCoords[4][index++] = glm::vec3(halfSide, 0, -halfSide);
+	pyramidCoords[4][index++] = glm::vec3(halfSide, 0, halfSide);
+	pyramidCoords[4][index++] = glm::vec3(0, height, 0);
+	index = 0;
+
+	// Shape 객체 생성 (육면체의 각 면에 해당하는 좌표 포함)
+	pyramid[0] = Shape(4, pyramidCoords[0]);
+	for (int i = 1; i < 5; ++i)
+	{
+		pyramid[i] = Shape(3, pyramidCoords[i]);
 	}
 }
 #endif // Quiz17
@@ -522,6 +569,7 @@ void InitializeData()
 #endif // Quiz15
 #ifdef Quiz17
 	CreateCube(cube);
+	CreatePyramid(pyramid);
 #endif // Quzi17
 
 }
@@ -816,6 +864,25 @@ GLvoid drawScene()
 
 			glPolygonMode(GL_FRONT_AND_BACK, drawmode);
 			cube[i].Draw(i);
+		}
+	}
+	else if (drawshape == 2)
+	{
+		for (int i = 0; i < 5; ++i)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, pyramid[i].translation);
+			model = glm::rotate(model, pyramid[i].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, pyramid[i].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, pyramid[i].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::scale(model, pyramid[i].scaling);
+
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+			UpdateBuffer();
+
+			glPolygonMode(GL_FRONT_AND_BACK, drawmode);
+			pyramid[i].Draw(i + 6);
 		}
 	}
 #endif // Quiz17
@@ -1132,6 +1199,44 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	}
 #endif // Quiz15
+#ifdef Quiz17
+	switch (key)
+	{
+	case '1':
+		drawshape = 1;
+		break;
+	case '2':
+		drawshape = 2;
+		break;
+	case 'h':
+		if (depthtest)
+		{
+			glDisable(GL_DEPTH_TEST);
+			depthtest = false;
+		}
+		else
+		{
+			glEnable(GL_DEPTH_TEST);
+			depthtest = true;
+		}
+		break;
+	case 'y':
+		if (rotationY)
+		{
+			rotationY = false;
+		}
+		else
+		{
+			rotationY = true;
+		}
+		break;
+	case '`':
+		InitializeData();
+		break;
+	default:
+		break;
+	}
+#endif // Quiz17
 
 	if(key == 'q')
 		glutLeaveMainLoop();
@@ -1515,6 +1620,28 @@ GLvoid Timer(int value)
 		break;
 	}
 #endif // Quiz15
+#ifdef Quiz17
+	if (rotationY)
+	{
+		switch (drawshape)
+		{
+		case 1:
+			for (int i = 0; i < 6; ++i)
+			{
+				cube[i].rotation.y += glm::radians(1.0f);
+			}
+			break;
+		case 2:
+			for (int i = 0; i < 5; ++i)
+			{
+				pyramid[i].rotation.y += glm::radians(1.0f);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+#endif // Quiz17
 
 	glutPostRedisplay();
 	glutTimerFunc(1000 / FPS, Timer, 1);
@@ -1655,14 +1782,14 @@ void UpdateBuffer()
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 		glBufferSubData(GL_ARRAY_BUFFER, i * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(cube[i].shapecolor[0]));
 	}
-	//for (int i = 0; i < 5; i++)
-	//{
-	//	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	//	glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecoord[0]));
+	for (int i = 0; i < 5; i++)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecoord[0]));
 
-	//	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	//	glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
-	//}
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
+	}
 
 #endif // Quiz17
 
