@@ -291,6 +291,8 @@ static const int index = 11;
 
 Shape cube[6];
 Shape pyramid[5];
+float cube_transform[3];
+float pyramid_transform[4];
 int drawshape = 1;
 GLenum drawmode = GL_FILL;
 bool depthtest = true;
@@ -574,6 +576,14 @@ void InitializeData()
 #ifdef Quiz17
 	CreateCube(cube);
 	CreatePyramid(pyramid);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		pyramid_transform[i] = 0.0f;
+	}
+	cube_transform[0] = 0.0f;
+	cube_transform[1] = 0.0f;
+	cube_transform[2] = 0.0f;
 
 	cube_rotatetop = false;
 	cube_openfront = false;
@@ -867,6 +877,27 @@ GLvoid drawScene()
 			model = glm::rotate(model, cube[i].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 			model = glm::scale(model, cube[i].scaling);
 
+			switch (i)
+			{
+			case 0:
+				model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.25f));
+				model = glm::rotate(model, cube_transform[1], glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.25f));
+				break;
+			case 1:
+				model = glm::translate(model, glm::vec3(0.0f, 0.25f, -0.25f));
+				model = glm::scale(model, glm::vec3(cube_transform[2]));
+				model = glm::translate(model, glm::vec3(0.0f, -0.25f, 0.25f));
+				break;
+			case 4:
+				model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+				model = glm::rotate(model, cube_transform[0], glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
+				break;
+			default:
+				break;
+			}
+
 			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 			UpdateBuffer();
@@ -883,11 +914,11 @@ GLvoid drawScene()
 			model = glm::rotate(model, pyramid[i].revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::rotate(model, pyramid[i].revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, pyramid[i].revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::scale(model, pyramid[i].scaling);
 			model = glm::translate(model, pyramid[i].translation);
 			model = glm::rotate(model, pyramid[i].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::rotate(model, pyramid[i].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, pyramid[i].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-			model = glm::scale(model, pyramid[i].scaling);
 
 			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -1464,7 +1495,6 @@ GLvoid Mouse(int button, int state, int x, int y)
 {
 	float fx = 0.0, fy = 0.0;
 	convertXY(x, y, fx, fy);
-
 }
 
 GLvoid Timer(int value)
@@ -1683,9 +1713,39 @@ GLvoid Timer(int value)
 				cube[i].rotation.y += glm::radians(1.0f);
 			}
 		}
+
 		if (cube_rotatetop)
 		{
-			cube[4].rotation.x += glm::radians(1.0f);
+			cube_transform[0] += glm::radians(1.0f);
+		}
+
+		if (cube_openfront && cube_transform[1] < glm::radians(90.0f))
+		{
+			cube_transform[1] += glm::radians(1.0f);
+		}
+		else if (!cube_openfront && cube_transform[1] > glm::radians(0.0f))
+		{
+			cube_transform[1] -= glm::radians(1.0f);
+		}
+
+		if (cube_openside && cube[2].translation.y < 0.5f)
+		{
+			cube[2].translation.y += 0.025f;
+			cube[3].translation.y += 0.025f;
+		}
+		else if (!cube_openside && cube[2].translation.y > 0.0f)
+		{
+			cube[2].translation.y -= 0.025f;
+			cube[3].translation.y -= 0.025f;
+		}
+
+		if (cube_openback && cube_transform[2] > 0.0f)
+		{
+			cube_transform[2] -= 0.05f;
+		}
+		else if (!cube_openback && cube_transform[2] < 1.0f)
+		{
+			cube_transform[2] += 0.05f;
 		}
 		break;
 	case 2:
