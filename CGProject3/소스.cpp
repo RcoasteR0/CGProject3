@@ -287,6 +287,8 @@ Shape CreateSpiral(float radius, int segments)
 #endif // Quiz15
 
 #ifdef Quiz17
+enum PyramidAnimation { NONE, OPEN, CLOSE, OPEN_EACH, CLOSE_EACH };
+
 static const int index = 11;
 
 Shape cube[6];
@@ -301,6 +303,7 @@ bool cube_rotatetop;
 bool cube_openfront;
 bool cube_openside;
 bool cube_openback;
+PyramidAnimation pyramid_anim;
 
 void CreateCube(Shape cube[], float sideLength = 0.5f)
 {
@@ -589,6 +592,7 @@ void InitializeData()
 	cube_openfront = false;
 	cube_openside = false;
 	cube_openback = false;
+	pyramid_anim = NONE;
 #endif // Quzi17
 
 }
@@ -919,6 +923,32 @@ GLvoid drawScene()
 			model = glm::rotate(model, pyramid[i].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::rotate(model, pyramid[i].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 			model = glm::rotate(model, pyramid[i].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+			switch (i)
+			{
+			case 1:
+				model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.25f));
+				model = glm::rotate(model, pyramid_transform[1], glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.25f));
+				break;
+			case 2:
+				model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.25f));
+				model = glm::rotate(model, -pyramid_transform[2], glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.25f));
+				break;
+			case 3:
+				model = glm::translate(model, glm::vec3(-0.25f, 0.0f, 0.0f));
+				model = glm::rotate(model, pyramid_transform[3], glm::vec3(0.0f, 0.0f, 1.0f));
+				model = glm::translate(model, glm::vec3(0.25f, 0.0f, 0.0f));
+				break;
+			case 4:
+				model = glm::translate(model, glm::vec3(0.25f, 0.0f, 0.0f));
+				model = glm::rotate(model, -pyramid_transform[4], glm::vec3(0.0f, 0.0f, 1.0f));
+				model = glm::translate(model, glm::vec3(-0.25f, 0.0f, 0.0f));
+				break;
+			default:
+				break;
+			}
 
 			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -1311,6 +1341,26 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		else
 		{
 			cube_openback = true;
+		}
+		break;
+	case 'o':
+		if (pyramid_anim == OPEN)
+		{
+			pyramid_anim = CLOSE;
+		}
+		else
+		{
+			pyramid_anim = OPEN;
+		}
+		break;
+	case 'r':
+		if (pyramid_anim == OPEN_EACH)
+		{
+			pyramid_anim = CLOSE_EACH;
+		}
+		else
+		{
+			pyramid_anim = OPEN_EACH;
 		}
 		break;
 	case '`':
@@ -1755,6 +1805,62 @@ GLvoid Timer(int value)
 			{
 				pyramid[i].rotation.y += glm::radians(1.0f);
 			}
+		}
+
+		switch (pyramid_anim)
+		{
+		case OPEN:
+			for (int i = 0; i < 4; ++i)
+			{
+				if (pyramid_transform[i] < glm::radians(240.0f))
+					pyramid_transform[i] += glm::radians(1.0f);
+			}
+			break;
+		case CLOSE:
+			for (int i = 0; i < 4; ++i)
+			{
+				if (pyramid_transform[i] > glm::radians(0.0f))
+					pyramid_transform[i] -= glm::radians(1.0f);
+			}
+			break;
+		case OPEN_EACH:
+			if (pyramid_transform[0] < glm::radians(150.0f))
+			{
+				pyramid_transform[0] += glm::radians(1.0f);
+			}
+			else if (pyramid_transform[1] < glm::radians(150.0f))
+			{
+				pyramid_transform[1] += glm::radians(1.0f);
+			}
+			else if (pyramid_transform[2] < glm::radians(150.0f))
+			{
+				pyramid_transform[2] += glm::radians(1.0f);
+			}
+			else if (pyramid_transform[3] < glm::radians(150.0f))
+			{
+				pyramid_transform[3] += glm::radians(1.0f);
+			}
+			break;
+		case CLOSE_EACH:
+			if (pyramid_transform[3] > glm::radians(0.0f))
+			{
+				pyramid_transform[3] -= glm::radians(1.0f);
+			}
+			else if (pyramid_transform[2] > glm::radians(0.0f))
+			{
+				pyramid_transform[2] -= glm::radians(1.0f);
+			}
+			else if (pyramid_transform[1] > glm::radians(0.0f))
+			{
+				pyramid_transform[1] -= glm::radians(1.0f);
+			}
+			else if (pyramid_transform[0] > glm::radians(0.0f))
+			{
+				pyramid_transform[0] -= glm::radians(1.0f);
+			}
+			break;
+		default:
+			break;
 		}
 		break;
 	default:
