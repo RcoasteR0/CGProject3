@@ -295,6 +295,10 @@ int drawshape = 1;
 GLenum drawmode = GL_FILL;
 bool depthtest = true;
 bool rotationY = false;
+bool cube_rotatetop;
+bool cube_openfront;
+bool cube_openside;
+bool cube_openback;
 
 void CreateCube(Shape cube[], float sideLength = 0.5f)
 {
@@ -570,6 +574,11 @@ void InitializeData()
 #ifdef Quiz17
 	CreateCube(cube);
 	CreatePyramid(pyramid);
+
+	cube_rotatetop = false;
+	cube_openfront = false;
+	cube_openside = false;
+	cube_openback = false;
 #endif // Quzi17
 
 }
@@ -871,6 +880,9 @@ GLvoid drawScene()
 		for (int i = 0; i < 5; ++i)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::rotate(model, pyramid[i].revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, pyramid[i].revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, pyramid[i].revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
 			model = glm::translate(model, pyramid[i].translation);
 			model = glm::rotate(model, pyramid[i].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 			model = glm::rotate(model, pyramid[i].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1228,6 +1240,46 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		else
 		{
 			rotationY = true;
+		}
+		break;
+	case 't':
+		if (cube_rotatetop)
+		{
+			cube_rotatetop = false;
+		}
+		else
+		{
+			cube_rotatetop = true;
+		}
+		break;
+	case 'f':
+		if (cube_openfront)
+		{
+			cube_openfront = false;
+		}
+		else
+		{
+			cube_openfront = true;
+		}
+		break;
+	case 's':
+		if (cube_openside)
+		{
+			cube_openside = false;
+		}
+		else
+		{
+			cube_openside = true;
+		}
+		break;
+	case 'd':
+		if (cube_openback)
+		{
+			cube_openback = false;
+		}
+		else
+		{
+			cube_openback = true;
 		}
 		break;
 	case '`':
@@ -1621,26 +1673,34 @@ GLvoid Timer(int value)
 	}
 #endif // Quiz15
 #ifdef Quiz17
-	if (rotationY)
+	switch (drawshape)
 	{
-		switch (drawshape)
+	case 1:
+		if (rotationY)
 		{
-		case 1:
 			for (int i = 0; i < 6; ++i)
 			{
 				cube[i].rotation.y += glm::radians(1.0f);
 			}
-			break;
-		case 2:
+		}
+		if (cube_rotatetop)
+		{
+			cube[4].rotation.x += glm::radians(1.0f);
+		}
+		break;
+	case 2:
+		if (rotationY)
+		{
 			for (int i = 0; i < 5; ++i)
 			{
 				pyramid[i].rotation.y += glm::radians(1.0f);
 			}
-			break;
-		default:
-			break;
 		}
+		break;
+	default:
+		break;
 	}
+
 #endif // Quiz17
 
 	glutPostRedisplay();
