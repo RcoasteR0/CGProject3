@@ -298,6 +298,7 @@ float pyramid_transform[4];
 int drawshape = 1;
 GLenum drawmode = GL_FILL;
 bool depthtest = true;
+bool perspective = false;
 bool rotationY = false;
 bool cube_rotatetop;
 bool cube_openfront;
@@ -651,6 +652,14 @@ GLvoid drawScene()
 
 	glm::mat4 projection = glm::mat4(1.0f);
 	projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -0.1f, 50.0f); //투영 공간 설정 : [-100.0, 100.0]
+
+#ifdef Quiz17
+	if (perspective)
+	{
+		projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 50.0f);
+	}
+#endif // Quiz17
+
 	unsigned int projectionLocation = glGetUniformLocation(shaderProgramID, "projectionTransform"); //투영 변환 값 설정
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 
@@ -1291,6 +1300,16 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		{
 			glEnable(GL_DEPTH_TEST);
 			depthtest = true;
+		}
+		break;
+	case 'p':
+		if (perspective)
+		{
+			perspective = false;
+		}
+		else
+		{
+			perspective = true;
 		}
 		break;
 	case 'y':
