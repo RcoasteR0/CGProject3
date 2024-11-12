@@ -374,7 +374,7 @@ void CreatePyramid(Shape pyramid[], float sideLength = 0.5f, float height = 0.5f
 	pyramidCoords[0][index++] = glm::vec3(-halfSide, 0, halfSide);
 	pyramidCoords[0][index++] = glm::vec3(-halfSide, 0, -halfSide);
 	pyramidCoords[0][index++] = glm::vec3(halfSide, 0, -halfSide);
-	pyramidCoords[0][index++] = glm::vec3(-halfSide, 0, halfSide);
+	pyramidCoords[0][index++] = glm::vec3(halfSide, 0, halfSide);
 	index = 0;
 
 	// 앞면
@@ -928,22 +928,22 @@ GLvoid drawScene()
 			{
 			case 1:
 				model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.25f));
-				model = glm::rotate(model, pyramid_transform[1], glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, pyramid_transform[0], glm::vec3(1.0f, 0.0f, 0.0f));
 				model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.25f));
 				break;
 			case 2:
 				model = glm::translate(model, glm::vec3(0.0f, 0.0f, -0.25f));
-				model = glm::rotate(model, -pyramid_transform[2], glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, -pyramid_transform[1], glm::vec3(1.0f, 0.0f, 0.0f));
 				model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.25f));
 				break;
 			case 3:
 				model = glm::translate(model, glm::vec3(-0.25f, 0.0f, 0.0f));
-				model = glm::rotate(model, pyramid_transform[3], glm::vec3(0.0f, 0.0f, 1.0f));
+				model = glm::rotate(model, pyramid_transform[2], glm::vec3(0.0f, 0.0f, 1.0f));
 				model = glm::translate(model, glm::vec3(0.25f, 0.0f, 0.0f));
 				break;
 			case 4:
 				model = glm::translate(model, glm::vec3(0.25f, 0.0f, 0.0f));
-				model = glm::rotate(model, -pyramid_transform[4], glm::vec3(0.0f, 0.0f, 1.0f));
+				model = glm::rotate(model, -pyramid_transform[3], glm::vec3(0.0f, 0.0f, 1.0f));
 				model = glm::translate(model, glm::vec3(-0.25f, 0.0f, 0.0f));
 				break;
 			default:
@@ -1812,7 +1812,7 @@ GLvoid Timer(int value)
 		case OPEN:
 			for (int i = 0; i < 4; ++i)
 			{
-				if (pyramid_transform[i] < glm::radians(240.0f))
+				if (pyramid_transform[i] < glm::radians(180.0f + (90.0f - 63.4f) * 2))
 					pyramid_transform[i] += glm::radians(1.0f);
 			}
 			break;
@@ -1824,19 +1824,19 @@ GLvoid Timer(int value)
 			}
 			break;
 		case OPEN_EACH:
-			if (pyramid_transform[0] < glm::radians(150.0f))
+			if (pyramid_transform[0] < glm::radians(180.0f - 63.4f))
 			{
 				pyramid_transform[0] += glm::radians(1.0f);
 			}
-			else if (pyramid_transform[1] < glm::radians(150.0f))
+			else if (pyramid_transform[1] < glm::radians(180.0f - 63.4f))
 			{
 				pyramid_transform[1] += glm::radians(1.0f);
 			}
-			else if (pyramid_transform[2] < glm::radians(150.0f))
+			else if (pyramid_transform[2] < glm::radians(180.0f - 63.4f))
 			{
 				pyramid_transform[2] += glm::radians(1.0f);
 			}
-			else if (pyramid_transform[3] < glm::radians(150.0f))
+			else if (pyramid_transform[3] < glm::radians(180.0f - 63.4f))
 			{
 				pyramid_transform[3] += glm::radians(1.0f);
 			}
