@@ -1937,15 +1937,6 @@ void InitBuffer()
 	//--- attribute 인덱스 1번을 사용 가능하게 함.
 	glEnableVertexAttribArray(1);
 
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	GLuint indices[index * MAX_POINTS];
-	for (int i = 0; i < buffersize * MAX_POINTS; i++)
-	{
-		indices[i] = i % MAX_POINTS;
-	}
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
-
 	drawAxes();
 }
 
