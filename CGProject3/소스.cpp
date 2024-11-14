@@ -9,7 +9,7 @@
 #include "Shader.h"
 #include "Shape.h"
 
-#define Quiz17
+#define Quiz18
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define FPS 60
@@ -410,6 +410,52 @@ void CreatePyramid(Shape pyramid[], float sideLength = 0.5f, float height = 0.5f
 	}
 }
 #endif // Quiz17
+
+#ifdef Quiz18
+static const int index = 13;
+Shape middle;
+Shape satelite_of_middle[3];
+Shape satelite_of_satelite[3];
+Shape route_satelite_of_middle[3];
+Shape route_satelite_of_satelite[3];
+GLenum drawmode = GL_FILL;
+bool depthtest = true;
+
+
+Shape CreateSphere(float radius, int latitudeSegments, int longitudeSegments)
+{
+	glm::vec3 sphereCoords[MAX_POINTS];
+
+	int index = 0;
+
+	// 위도와 경도를 따라 구 표면 점 생성
+	for (int lat = 0; lat <= latitudeSegments; ++lat)
+	{
+		float theta = lat * M_PI / latitudeSegments;
+		float sinTheta = sin(theta);
+		float cosTheta = cos(theta);
+
+		for (int lon = 0; lon <= longitudeSegments; ++lon)
+		{
+			float phi = lon * 2.0f * M_PI / longitudeSegments;
+			float sinPhi = sin(phi);
+			float cosPhi = cos(phi);
+
+			// x, y, z 좌표계로 변환하여 점 위치 설정
+			float x = radius * cosPhi * sinTheta;
+			float y = radius * cosTheta;
+			float z = radius * sinPhi * sinTheta;
+
+			sphereCoords[index++] = glm::vec3(x, y, z);
+		}
+	}
+
+	// 생성된 좌표로 Shape 객체 생성
+	Shape sphere(index, sphereCoords);
+	return sphere;
+}
+#endif // Quiz18
+
 
 void InitializeData()
 {
