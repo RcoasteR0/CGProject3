@@ -686,7 +686,7 @@ GLvoid drawScene()
 
 		UpdateBuffer();
 
-		cube[drawidx].Draw(drawidx);
+		cube[drawidx].OldDraw(drawidx);
 
 		if (drawidx_2 >= 0)
 		{
@@ -701,7 +701,7 @@ GLvoid drawScene()
 
 			UpdateBuffer();
 
-			cube[drawidx_2].Draw(drawidx_2);
+			cube[drawidx_2].OldDraw(drawidx_2);
 		}
 	}
 	else if(drawshape == 2)
@@ -717,7 +717,7 @@ GLvoid drawScene()
 
 		UpdateBuffer();
 
-		pyramid[drawidx].Draw(drawidx + 6);
+		pyramid[drawidx].OldDraw(drawidx + 6);
 
 		if (drawidx_2 >= 0)
 		{
@@ -732,7 +732,7 @@ GLvoid drawScene()
 
 			UpdateBuffer();
 
-			pyramid[drawidx_2].Draw(drawidx_2 + 6);
+			pyramid[drawidx_2].OldDraw(drawidx_2 + 6);
 		}
 	}
 #endif // Quiz13
@@ -753,7 +753,7 @@ GLvoid drawScene()
 			UpdateBuffer();
 
 			glPolygonMode(GL_FRONT_AND_BACK, drawmode);
-			cube[i].Draw(i);
+			cube[i].OldDraw(i);
 		}
 	}
 	else if (drawshape == 2)
@@ -772,7 +772,7 @@ GLvoid drawScene()
 			UpdateBuffer();
 
 			glPolygonMode(GL_FRONT_AND_BACK, drawmode);
-			pyramid[i].Draw(i + 6);
+			pyramid[i].OldDraw(i + 6);
 		}
 	}
 
@@ -796,7 +796,7 @@ GLvoid drawScene()
 		UpdateBuffer();
 
 		glPolygonMode(GL_FRONT_AND_BACK, drawmode);
-		sphere.Draw(2);
+		sphere.OldDraw(2);
 
 		model = glm::mat4(1.0f);
 		model = glm::rotate(model, cylinder.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -834,7 +834,7 @@ GLvoid drawScene()
 		UpdateBuffer();
 
 		glPolygonMode(GL_FRONT_AND_BACK, drawmode);
-		cube.Draw(0);
+		cube.OldDraw(0);
 
 		model = glm::mat4(1.0f);
 		model = glm::rotate(model, cone.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -852,7 +852,7 @@ GLvoid drawScene()
 		UpdateBuffer();
 
 		glPolygonMode(GL_FRONT_AND_BACK, drawmode);
-		cone.Draw(1);
+		cone.OldDraw(1);
 	}
 
 	if (anim == SPIRAL)
@@ -916,7 +916,7 @@ GLvoid drawScene()
 			UpdateBuffer();
 
 			glPolygonMode(GL_FRONT_AND_BACK, drawmode);
-			cube[i].Draw(i);
+			cube[i].OldDraw(i);
 		}
 	}
 	else if (drawshape == 2)
@@ -964,7 +964,7 @@ GLvoid drawScene()
 			UpdateBuffer();
 
 			glPolygonMode(GL_FRONT_AND_BACK, drawmode);
-			pyramid[i].Draw(i + 6);
+			pyramid[i].OldDraw(i + 6);
 		}
 	}
 #endif // Quiz17

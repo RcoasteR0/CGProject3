@@ -78,8 +78,26 @@ public:
 
 	~Shape() {}
 
+	void OldDraw(int i, GLenum mode = GL_TRIANGLE_FAN)
+	{
+		glDrawArrays(mode, i * MAX_POINTS, points);
+	}
+
 	void Draw(int i, GLenum mode = GL_TRIANGLE_FAN)
 	{
+		GLuint transformLoc = glGetUniformLocation(shaderProgramID, "modelTransform");
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, cube[i].revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, cube[i].revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, cube[i].revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::translate(model, cube[i].translation);
+		model = glm::rotate(model, cube[i].rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, cube[i].rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, cube[i].rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, cube[i].scaling);
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(mode, i * MAX_POINTS, points);
 	}
 	
