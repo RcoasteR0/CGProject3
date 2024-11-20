@@ -419,23 +419,24 @@ Shape satelite_of_satelite[3];
 Shape route_satelite_of_middle[3];
 Shape route_satelite_of_satelite[3];
 GLenum drawmode = GL_FILL;
+float angle = 0.0f;
 bool depthtest = true;
 
 
-Shape CreateSphere(float radius, int latitudeSegments, int longitudeSegments)
+Shape CreateSphere(float radius, glm::vec3 middle = glm::vec3(0.0f), int latitudeSegments = glm::sqrt(MAX_POINTS), int longitudeSegments = glm::sqrt(MAX_POINTS))
 {
 	glm::vec3 sphereCoords[MAX_POINTS];
 
 	int index = 0;
 
 	// 위도와 경도를 따라 구 표면 점 생성
-	for (int lat = 0; lat <= latitudeSegments; ++lat)
+	for (int lat = 0; lat < latitudeSegments; ++lat)
 	{
 		float theta = lat * M_PI / latitudeSegments;
 		float sinTheta = sin(theta);
 		float cosTheta = cos(theta);
 
-		for (int lon = 0; lon <= longitudeSegments; ++lon)
+		for (int lon = 0; lon < longitudeSegments; ++lon)
 		{
 			float phi = lon * 2.0f * M_PI / longitudeSegments;
 			float sinPhi = sin(phi);
@@ -446,7 +447,7 @@ Shape CreateSphere(float radius, int latitudeSegments, int longitudeSegments)
 			float y = radius * cosTheta;
 			float z = radius * sinPhi * sinTheta;
 
-			sphereCoords[index++] = glm::vec3(x, y, z);
+			sphereCoords[index++] = glm::vec3(x, y, z) + middle;
 		}
 	}
 
@@ -641,6 +642,15 @@ void InitializeData()
 	cube_openback = false;
 	pyramid_anim = NONE;
 #endif // Quzi17
+#ifdef Quiz18
+	middle = CreateSphere(0.3f);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		satelite_of_middle[i] = CreateSphere(0.1f);
+		satelite_of_satelite[i] = CreateSphere(0.05f);
+	}	
+#endif // Quiz18
 
 }
 
@@ -691,13 +701,16 @@ GLvoid drawScene()
 #ifdef Quiz17
 	cameraPos = glm::vec3(-1.0f, 2.0f, 2.0f);
 #endif // Quiz17
+#ifdef Quiz18
+	cameraPos = glm::vec3(0.0f, 1.0f, 2.0f);
+#endif // Quiz18
 
 	view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
 	unsigned int viewLocation = glGetUniformLocation(shaderProgramID, "viewTransform"); //뷰잉 변환 설정
 	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
 
 	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -0.1f, 50.0f); //투영 공간 설정 : [-100.0, 100.0]
+	projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -0.1f, 100.0f); //투영 공간 설정 : [-100.0, 100.0]
 
 #ifdef Quiz17
 	if (perspective)
@@ -715,6 +728,7 @@ GLvoid drawScene()
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(axesTransform));
 	glDrawArrays(GL_LINES, 0, 6);
 
+	UpdateBuffer();
 
 	glBindVertexArray(vao);
 
@@ -1014,6 +1028,21 @@ GLvoid drawScene()
 		}
 	}
 #endif // Quiz17
+#ifdef Quiz18
+	glPolygonMode(GL_FRONT_AND_BACK, drawmode);
+
+	middle.Draw(0);
+	
+	for (int i = 0; i < 3; ++i)
+	{
+		satelite_of_middle[i].Draw(i + 1);
+	}
+	
+	for (int i = 0; i < 3; ++i)
+	{
+		satelite_of_satelite[i].Draw(i + 4);
+	}
+#endif // Quiz18
 
 	glutSwapBuffers();
 }
@@ -1933,6 +1962,19 @@ GLvoid Timer(int value)
 	}
 
 #endif // Quiz17
+#ifdef Quiz18
+	satelite_of_middle[0].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle)), 0.0f, 0.5f * glm::sin(glm::radians(angle)));
+	satelite_of_middle[1].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle + 90.0f)), -0.5f * glm::cos(glm::radians(angle + 90.0f)), 0.5f * glm::sin(glm::radians(angle + 90.0f)));
+	satelite_of_middle[2].translation = glm::vec3(-0.5f * glm::cos(glm::radians(angle + 180.0f)), -0.5f * glm::cos(glm::radians(angle + 180.0f)), 0.5f * glm::sin(glm::radians(angle + 180.0f)));
+
+	satelite_of_satelite[0].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle)) + 0.25f, 0.0f, 0.5f * glm::sin(glm::radians(angle)));
+	satelite_of_satelite[1].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle + 90.0f)) + 0.25f, -0.5f * glm::cos(glm::radians(angle + 90.0f)), 0.5f * glm::sin(glm::radians(angle + 90.0f)));
+	satelite_of_satelite[2].translation = glm::vec3(-0.5f * glm::cos(glm::radians(angle + 180.0f)) + 0.25f, -0.5f * glm::cos(glm::radians(angle + 180.0f)), 0.5f * glm::sin(glm::radians(angle + 180.0f)));
+
+	angle += 1.0f;
+	if (angle >= 360.0f)
+		angle = 0.0f;
+#endif // Quiz18
 
 	glutPostRedisplay();
 	glutTimerFunc(1000 / FPS, Timer, 1);
@@ -2071,6 +2113,32 @@ void UpdateBuffer()
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 		glBufferSubData(GL_ARRAY_BUFFER, (i + 6) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(pyramid[i].shapecolor[0]));
+	}
+
+#endif // Quiz17
+#ifdef Quiz18
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(middle.shapecoord[0]));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(middle.shapecolor[0]));
+
+	for (int i = 0; i < 3; i++)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 1) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(satelite_of_middle[i].shapecoord[0]));
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 1) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(satelite_of_middle[i].shapecolor[0]));
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 4) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(satelite_of_satelite[i].shapecoord[0]));
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferSubData(GL_ARRAY_BUFFER, (i + 4) * MAX_POINTS * 3 * sizeof(GLfloat), MAX_POINTS * 3 * sizeof(GLfloat), glm::value_ptr(satelite_of_satelite[i].shapecolor[0]));
 	}
 
 #endif // Quiz17
