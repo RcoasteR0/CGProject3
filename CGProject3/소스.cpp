@@ -420,7 +420,11 @@ Shape route_satelite_of_middle[3];
 Shape route_satelite_of_satelite[3];
 GLenum drawmode = GL_FILL;
 float angle = 0.0f;
+float move_x = 0.0f;
+float move_y = 0.0f;
+float move_z = 0.0f;
 bool depthtest = true;
+bool perspective = false;
 
 Shape CreateSphere(float radius, glm::vec3 middle = glm::vec3(0.0f), int latitudeSegments = glm::sqrt(MAX_POINTS), int longitudeSegments = glm::sqrt(MAX_POINTS))
 {
@@ -739,6 +743,12 @@ GLvoid drawScene()
 		projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 50.0f);
 	}
 #endif // Quiz17
+#ifdef Quiz18
+	if (perspective)
+	{
+		projection = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 50.0f);
+	}
+#endif // Quiz18
 
 	unsigned int projectionLocation = glGetUniformLocation(shaderProgramID, "projectionTransform"); //투영 변환 값 설정
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
@@ -1483,6 +1493,97 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	}
 #endif // Quiz17
+#ifdef Quiz18
+	switch (key)
+	{
+	case 'p':
+		perspective = false;
+		break;
+	case 'P':
+		perspective = true;
+		break;
+	case 'm':
+		drawmode = GL_FILL;
+		break;
+	case 'M':
+		drawmode = GL_LINE;
+		break;
+	case 'w':
+		move_y += 0.05f;
+		middle.translation.y += 0.05f;
+		for (int i = 0; i < 3; ++i)
+			route_satelite_of_middle[i].translation.y += 0.05f;
+		break;
+	case 's':
+		move_y -= 0.05f;
+		middle.translation.y -= 0.05f;
+		for (int i = 0; i < 3; ++i)
+			route_satelite_of_middle[i].translation.y -= 0.05f;
+		break;
+	case 'a':
+		move_x -= 0.05f;
+		middle.translation.x -= 0.05f;
+		for (int i = 0; i < 3; ++i)
+			route_satelite_of_middle[i].translation.x -= 0.05f;
+		break;
+	case 'd':
+		move_x += 0.05f;
+		middle.translation.x += 0.05f;
+		for (int i = 0; i < 3; ++i)
+			route_satelite_of_middle[i].translation.x += 0.05f;
+		break;
+	case '-':
+		move_z -= 0.05f;
+		middle.translation.z -= 0.05f;
+		for (int i = 0; i < 3; ++i)
+			route_satelite_of_middle[i].translation.z -= 0.05f;
+		break;
+	case '+':
+		move_z += 0.05f;
+		middle.translation.z += 0.05f;
+		for (int i = 0; i < 3; ++i)
+			route_satelite_of_middle[i].translation.z += 0.05f;
+		break;
+	case 'y':
+		for (int i = 0; i < 3; ++i)
+		{
+			satelite_of_middle[i].revolution.y += glm::radians(5.0f);
+			satelite_of_satelite[i].revolution.y += glm::radians(5.0f);
+			route_satelite_of_middle[i].revolution.y += glm::radians(5.0f);
+			route_satelite_of_satelite[i].revolution.y += glm::radians(5.0f);
+		}
+		break;
+	case 'Y':
+		for (int i = 0; i < 3; ++i)
+		{
+			satelite_of_middle[i].revolution.y -= glm::radians(5.0f);
+			satelite_of_satelite[i].revolution.y -= glm::radians(5.0f);
+			route_satelite_of_middle[i].revolution.y -= glm::radians(5.0f);
+			route_satelite_of_satelite[i].revolution.y -= glm::radians(5.0f);
+		}
+		break;
+	case 'z':
+		for (int i = 0; i < 3; ++i)
+		{
+			satelite_of_middle[i].revolution.z += glm::radians(5.0f);
+			satelite_of_satelite[i].revolution.z += glm::radians(5.0f);
+			route_satelite_of_middle[i].revolution.z += glm::radians(5.0f);
+			route_satelite_of_satelite[i].revolution.z += glm::radians(5.0f);
+		}
+		break;
+	case 'Z':
+		for (int i = 0; i < 3; ++i)
+		{
+			satelite_of_middle[i].revolution.z -= glm::radians(5.0f);
+			satelite_of_satelite[i].revolution.z -= glm::radians(5.0f);
+			route_satelite_of_middle[i].revolution.z -= glm::radians(5.0f);
+			route_satelite_of_satelite[i].revolution.z -= glm::radians(5.0f);
+		}
+		break;
+	default:
+		break;
+	}
+#endif // Quiz18
 
 	if(key == 'q')
 		glutLeaveMainLoop();
@@ -1992,6 +2093,14 @@ GLvoid Timer(int value)
 	route_satelite_of_satelite[0].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle)), 0.0f, 0.5f * glm::sin(glm::radians(angle)));
 	route_satelite_of_satelite[1].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle + 90.0f)), -0.5f * glm::cos(glm::radians(angle + 90.0f)), 0.5f * glm::sin(glm::radians(angle + 90.0f)));
 	route_satelite_of_satelite[2].translation = glm::vec3(-0.5f * glm::cos(glm::radians(angle + 180.0f)), -0.5f * glm::cos(glm::radians(angle + 180.0f)), 0.5f * glm::sin(glm::radians(angle + 180.0f)));
+
+	glm::vec3 move(move_x, move_y, move_z);
+	for (int i = 0; i < 3; ++i)
+	{
+		satelite_of_middle[i].translation += move;
+		satelite_of_satelite[i].translation += move;
+		route_satelite_of_satelite[i].translation += move;
+	}
 
 	angle += 1.0f;
 	if (angle >= 360.0f)
