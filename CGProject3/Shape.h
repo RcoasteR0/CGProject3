@@ -100,6 +100,11 @@ public:
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(mode, i * MAX_POINTS, points);
 	}
+
+	void Draw_Without_Transform(int i, GLenum mode = GL_TRIANGLE_FAN)
+	{
+		glDrawArrays(mode, i * MAX_POINTS, points);
+	}
 	
 	void DrawLineStrip(int i)
 	{

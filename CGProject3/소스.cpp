@@ -420,9 +420,8 @@ Shape route_satelite_of_middle[3];
 Shape route_satelite_of_satelite[3];
 GLenum drawmode = GL_FILL;
 float angle = 0.0f;
-float move_x = 0.0f;
-float move_y = 0.0f;
-float move_z = 0.0f;
+glm::vec3 move_satelite(0.0f);
+glm::vec3 rotate_satelite(0.0f);
 bool depthtest = true;
 bool perspective = false;
 
@@ -473,6 +472,30 @@ Shape CreateCircle(float radius, int segments = MAX_POINTS)
 	Shape circle(index, Coords);
 	return circle;
 }
+
+void TransformSatelite(Shape satelite)
+{
+	GLuint transformLoc = glGetUniformLocation(shaderProgramID, "modelTransform");
+
+	glm::mat4 model = glm::mat4(1.0f);
+
+	model = glm::translate(model, move_satelite);
+	model = glm::rotate(model, rotate_satelite.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, rotate_satelite.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::translate(model, -move_satelite);
+
+	model = glm::rotate(model, satelite.revolution.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, satelite.revolution.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, satelite.revolution.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::translate(model, satelite.translation);
+	model = glm::rotate(model, satelite.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, satelite.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, satelite.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, satelite.scaling);
+
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
+}
+
 #endif // Quiz18
 
 
@@ -667,9 +690,12 @@ void InitializeData()
 	{
 		satelite_of_middle[i] = CreateSphere(0.1f);
 		satelite_of_satelite[i] = CreateSphere(0.05f);
-		route_satelite_of_middle[i] = CreateCircle(0.5);
 		route_satelite_of_satelite[i] = CreateCircle(0.25f);
 	}	
+
+	route_satelite_of_middle[0] = CreateCircle(0.75);
+	route_satelite_of_middle[1] = CreateCircle(0.5);
+	route_satelite_of_middle[2] = CreateCircle(0.5);
 
 	route_satelite_of_middle[1].rotation.z = glm::radians(-45.0f);
 	route_satelite_of_middle[1].scaling = glm::vec3(glm::sqrt(2));
@@ -1066,10 +1092,14 @@ GLvoid drawScene()
 	
 	for (int i = 0; i < 3; ++i)
 	{
-		satelite_of_middle[i].Draw(i + 1);
-		satelite_of_satelite[i].Draw(i + 4);
-		route_satelite_of_middle[i].Draw(i + 7, GL_LINE_STRIP);
-		route_satelite_of_satelite[i].Draw(i + 10, GL_LINE_STRIP);
+		TransformSatelite(satelite_of_middle[i]);
+		satelite_of_middle[i].Draw_Without_Transform(i + 1);
+		TransformSatelite(satelite_of_satelite[i]);
+		satelite_of_satelite[i].Draw_Without_Transform(i + 4);
+		TransformSatelite(route_satelite_of_middle[i]);
+		route_satelite_of_middle[i].Draw_Without_Transform(i + 7, GL_LINE_STRIP);
+		TransformSatelite(route_satelite_of_satelite[i]);
+		route_satelite_of_satelite[i].Draw_Without_Transform(i + 10, GL_LINE_STRIP);
 	}
 #endif // Quiz18
 
@@ -1509,76 +1539,52 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		drawmode = GL_LINE;
 		break;
 	case 'w':
-		move_y += 0.05f;
+		move_satelite.y += 0.05f;
 		middle.translation.y += 0.05f;
 		for (int i = 0; i < 3; ++i)
 			route_satelite_of_middle[i].translation.y += 0.05f;
 		break;
 	case 's':
-		move_y -= 0.05f;
+		move_satelite.y -= 0.05f;
 		middle.translation.y -= 0.05f;
 		for (int i = 0; i < 3; ++i)
 			route_satelite_of_middle[i].translation.y -= 0.05f;
 		break;
 	case 'a':
-		move_x -= 0.05f;
+		move_satelite.x -= 0.05f;
 		middle.translation.x -= 0.05f;
 		for (int i = 0; i < 3; ++i)
 			route_satelite_of_middle[i].translation.x -= 0.05f;
 		break;
 	case 'd':
-		move_x += 0.05f;
+		move_satelite.x += 0.05f;
 		middle.translation.x += 0.05f;
 		for (int i = 0; i < 3; ++i)
 			route_satelite_of_middle[i].translation.x += 0.05f;
 		break;
 	case '-':
-		move_z -= 0.05f;
+		move_satelite.z -= 0.05f;
 		middle.translation.z -= 0.05f;
 		for (int i = 0; i < 3; ++i)
 			route_satelite_of_middle[i].translation.z -= 0.05f;
 		break;
 	case '+':
-		move_z += 0.05f;
+		move_satelite.z += 0.05f;
 		middle.translation.z += 0.05f;
 		for (int i = 0; i < 3; ++i)
 			route_satelite_of_middle[i].translation.z += 0.05f;
 		break;
 	case 'y':
-		for (int i = 0; i < 3; ++i)
-		{
-			satelite_of_middle[i].revolution.y += glm::radians(5.0f);
-			satelite_of_satelite[i].revolution.y += glm::radians(5.0f);
-			route_satelite_of_middle[i].revolution.y += glm::radians(5.0f);
-			route_satelite_of_satelite[i].revolution.y += glm::radians(5.0f);
-		}
+		rotate_satelite.y += glm::radians(5.0f);
 		break;
 	case 'Y':
-		for (int i = 0; i < 3; ++i)
-		{
-			satelite_of_middle[i].revolution.y -= glm::radians(5.0f);
-			satelite_of_satelite[i].revolution.y -= glm::radians(5.0f);
-			route_satelite_of_middle[i].revolution.y -= glm::radians(5.0f);
-			route_satelite_of_satelite[i].revolution.y -= glm::radians(5.0f);
-		}
+		rotate_satelite.y -= glm::radians(5.0f);
 		break;
 	case 'z':
-		for (int i = 0; i < 3; ++i)
-		{
-			satelite_of_middle[i].revolution.z += glm::radians(5.0f);
-			satelite_of_satelite[i].revolution.z += glm::radians(5.0f);
-			route_satelite_of_middle[i].revolution.z += glm::radians(5.0f);
-			route_satelite_of_satelite[i].revolution.z += glm::radians(5.0f);
-		}
+		rotate_satelite.z += glm::radians(5.0f);
 		break;
 	case 'Z':
-		for (int i = 0; i < 3; ++i)
-		{
-			satelite_of_middle[i].revolution.z -= glm::radians(5.0f);
-			satelite_of_satelite[i].revolution.z -= glm::radians(5.0f);
-			route_satelite_of_middle[i].revolution.z -= glm::radians(5.0f);
-			route_satelite_of_satelite[i].revolution.z -= glm::radians(5.0f);
-		}
+		rotate_satelite.z -= glm::radians(5.0f);
 		break;
 	default:
 		break;
@@ -2083,23 +2089,22 @@ GLvoid Timer(int value)
 
 #endif // Quiz17
 #ifdef Quiz18
-	satelite_of_middle[0].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle)), 0.0f, 0.5f * glm::sin(glm::radians(angle)));
-	satelite_of_middle[1].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle + 90.0f)), -0.5f * glm::cos(glm::radians(angle + 90.0f)), 0.5f * glm::sin(glm::radians(angle + 90.0f)));
-	satelite_of_middle[2].translation = glm::vec3(-0.5f * glm::cos(glm::radians(angle + 180.0f)), -0.5f * glm::cos(glm::radians(angle + 180.0f)), 0.5f * glm::sin(glm::radians(angle + 180.0f)));
+	satelite_of_middle[0].translation = glm::vec3(0.75f * glm::cos(glm::radians(angle)), 0.0f, 0.75f * glm::sin(glm::radians(angle)));
+	satelite_of_middle[1].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle + 90.0f)), -0.5f * glm::cos(glm::radians(angle + 90.0f)), 0.75f * glm::sin(glm::radians(angle + 90.0f)));
+	satelite_of_middle[2].translation = glm::vec3(-0.5f * glm::cos(glm::radians(angle + 180.0f)), -0.5f * glm::cos(glm::radians(angle + 180.0f)), 0.75f * glm::sin(glm::radians(angle + 180.0f)));
 
-	satelite_of_satelite[0].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle)) + 0.25f * glm::cos(glm::radians(angle)), 0.0f, 0.5f * glm::sin(glm::radians(angle)) + 0.25f * glm::sin(glm::radians(angle)));
-	satelite_of_satelite[1].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle + 90.0f)) + 0.25f * glm::cos(glm::radians(angle + 90.0f)), -0.5f * glm::cos(glm::radians(angle + 90.0f)), 0.5f * glm::sin(glm::radians(angle + 90.0f)) + 0.25f * glm::sin(glm::radians(angle + 90.0f)));
-	satelite_of_satelite[2].translation = glm::vec3(-0.5f * glm::cos(glm::radians(angle + 180.0f)) + 0.25f * glm::cos(glm::radians(angle + 180.0f)), -0.5f * glm::cos(glm::radians(angle + 180.0f)), 0.5f * glm::sin(glm::radians(angle + 180.0f)) + 0.25f * glm::sin(glm::radians(angle + 180.0f)));
-	route_satelite_of_satelite[0].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle)), 0.0f, 0.5f * glm::sin(glm::radians(angle)));
-	route_satelite_of_satelite[1].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle + 90.0f)), -0.5f * glm::cos(glm::radians(angle + 90.0f)), 0.5f * glm::sin(glm::radians(angle + 90.0f)));
-	route_satelite_of_satelite[2].translation = glm::vec3(-0.5f * glm::cos(glm::radians(angle + 180.0f)), -0.5f * glm::cos(glm::radians(angle + 180.0f)), 0.5f * glm::sin(glm::radians(angle + 180.0f)));
+	satelite_of_satelite[0].translation = glm::vec3(0.75f * glm::cos(glm::radians(angle)) + 0.25f * glm::cos(glm::radians(angle)), 0.0f, 0.75f * glm::sin(glm::radians(angle)) + 0.25f * glm::sin(glm::radians(angle)));
+	satelite_of_satelite[1].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle + 90.0f)) + 0.25f * glm::cos(glm::radians(angle + 90.0f)), -0.5f * glm::cos(glm::radians(angle + 90.0f)), 0.75f * glm::sin(glm::radians(angle + 90.0f)) + 0.25f * glm::sin(glm::radians(angle + 90.0f)));
+	satelite_of_satelite[2].translation = glm::vec3(-0.5f * glm::cos(glm::radians(angle + 180.0f)) + 0.25f * glm::cos(glm::radians(angle + 180.0f)), -0.5f * glm::cos(glm::radians(angle + 180.0f)), 0.75f * glm::sin(glm::radians(angle + 180.0f)) + 0.25f * glm::sin(glm::radians(angle + 180.0f)));
+	route_satelite_of_satelite[0].translation = glm::vec3(0.75f * glm::cos(glm::radians(angle)), 0.0f, 0.75f * glm::sin(glm::radians(angle)));
+	route_satelite_of_satelite[1].translation = glm::vec3(0.5f * glm::cos(glm::radians(angle + 90.0f)), -0.5f * glm::cos(glm::radians(angle + 90.0f)), 0.75f * glm::sin(glm::radians(angle + 90.0f)));
+	route_satelite_of_satelite[2].translation = glm::vec3(-0.5f * glm::cos(glm::radians(angle + 180.0f)), -0.5f * glm::cos(glm::radians(angle + 180.0f)), 0.75f * glm::sin(glm::radians(angle + 180.0f)));
 
-	glm::vec3 move(move_x, move_y, move_z);
 	for (int i = 0; i < 3; ++i)
 	{
-		satelite_of_middle[i].translation += move;
-		satelite_of_satelite[i].translation += move;
-		route_satelite_of_satelite[i].translation += move;
+		satelite_of_middle[i].translation += move_satelite;
+		satelite_of_satelite[i].translation += move_satelite;
+		route_satelite_of_satelite[i].translation += move_satelite;
 	}
 
 	angle += 1.0f;
